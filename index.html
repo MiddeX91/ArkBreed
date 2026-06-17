@@ -999,7 +999,7 @@
         }
 
         async function callGeminiAPI(base64Data, lineId, key) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
             const prompt = `Extract ARK dinosaur stats from image. Return ONLY pure JSON. Schema: {"hp": number, "stamina": number, "oxygen": number, "food": number, "weight": number, "melee": number, "gender": "M" or "W"}. Find wild points if visible, else raw values. Map logically.`;
 
             try {
