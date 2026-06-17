@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="de" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ARK: Survival Ascended - Breeding Hub</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        ark: {
+                            bg: '#f8f6f0',
+                            panel: '#ffffff',
+                            accent: '#ea580c',
+                            accentHover: '#c2410c',
+                            male: '#0284c7',
+                            female: '#db2777',
+                            border: '#e5e0d8'
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+            background-color: theme('colors.ark.bg');
+            background-image: radial-gradient(theme('colors.stone.200') 1px, transparent 0);
+            background-size: 20px 20px;
+        }
+        
+        /* Sticky Table Configuration */
+        .table-container {
+            position: relative;
+            z-index: 1;
+        }
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            background-color: #faf8f5 !important;
+            z-index: 10;
+            border-right: 1px solid theme('colors.ark.border');
+        }
+        .sticky-header {
+            z-index: 11;
+        }
+        
+        /* Hide Scrollbar but keep functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Custom Input Number hiding arrows */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none; margin: 0;
+        }
+        input[type="number"] { -moz-appearance: textfield; }
+
+        /* Modal Transitions */
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 200ms ease-out, transform 200ms ease-out; }
+        .modal-exit { opacity: 1; transform: scale(1); }
+        .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 150ms ease-in, transform 150ms ease-in; }
+    </style>
+</head>
+<body class="text-stone-800 min-h-screen flex flex-col justify-between pb-20 md:pb-6 selection:bg-ark-accent selection:text-white">
+
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-ark-border shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl shadow-sm text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-sm font-extrabold tracking-wide text-stone-900 uppercase">
+                        ARK <span class="text-ark-accent font-mono tracking-tighter">Breeder</span>
+                    </h1>
+                    <p class="text-[10px] font-medium text-stone-500 uppercase tracking-widest">Smart Management</p>
+                </div>
+            </div>
+
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex bg-stone-100/50 p-1 rounded-lg border border-stone-200">
+                <button onclick="switchTab('tab-breeding')" id="btn-tab-breeding" class="nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all bg-white text-ark-accent shadow-sm ring-1 ring-stone-200">🧬 Zuchtlinien</button>
+                <button onclick="switchTab('tab-bestand')" id="btn-tab-bestand" class="nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all text-stone-500 hover:text-stone-900">🦖 Bestand</button>
+                <button onclick="switchTab('tab-settings')" id="btn-tab-settings" class="nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all text-stone-500 hover:text-stone-900">⚙️ System</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 space-y-6">
+        
+        <!-- ==================== TAB: ZUCHTLINIEN ==================== -->
+        <div id="tab-breeding" class="space-y-6 animate-fade-in">
+            <div id="lines-container" class="space-y-8">
+                <!-- DYNAMICALLY RENDERED LINES GO HERE -->
+            </div>
+        </div>
+
+        <!-- ==================== TAB: BESTAND ==================== -->
+        <div id="tab-bestand" class="hidden space-y-6 animate-fade-in">
+            <div class="bg-white p-4 rounded-2xl border border-ark-border shadow-soft flex justify-between items-center">
+                <div>
+                    <h2 class="text-sm font-extrabold text-stone-800 uppercase tracking-wide">Archivierter Bestand</h2>
+                    <p class="text-xs text-stone-500 mt-0.5">Gesicherte Spitzenwerte und fertige Zuchttiere.</p>
+                </div>
+                <button onclick="clearBestandPrompt()" class="bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 px-3 py-2 rounded-xl text-xs font-bold transition">
+                    Leeren
+                </button>
+            </div>
+
+            <div id="bestand-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+
+            <div id="bestand-placeholder" class="hidden p-12 text-center bg-white rounded-2xl border border-stone-200 shadow-sm">
+                <div class="text-4xl mb-3">🦕</div>
+                <h3 class="text-sm font-bold text-stone-700">Das Archiv ist leer</h3>
+                <p class="text-xs text-stone-500 mt-1 max-w-xs mx-auto">Sichere Top-Werte aus deinen Zuchtprojekten, um sie später wiederzuverwenden.</p>
+            </div>
+        </div>
+
+        <!-- ==================== TAB: SETTINGS ==================== -->
+        <div id="tab-settings" class="hidden animate-fade-in max-w-2xl mx-auto w-full">
+            <div class="bg-white rounded-2xl border border-ark-border shadow-soft overflow-hidden">
+                <div class="p-5 border-b border-stone-100 bg-stone-50/50">
+                    <h2 class="text-sm font-extrabold text-stone-800 uppercase tracking-wide">System & Daten</h2>
+                    <p class="text-xs text-stone-500 mt-1">Verwalte deine Speicherstände und KI-Einstellungen.</p>
+                </div>
+                
+                <div class="p-5 space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-4 bg-stone-50 rounded-xl border border-stone-200 hover:border-stone-300 transition">
+                            <h3 class="text-xs font-bold text-stone-800 flex items-center gap-1.5 mb-1">
+                                <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Backup sichern
+                            </h3>
+                            <p class="text-[10px] text-stone-500 mb-3 leading-relaxed">Lädt alle Projekte und Bestände als JSON-Datei herunter.</p>
+                            <button onclick="exportBackup()" class="w-full bg-white border border-stone-300 hover:bg-stone-50 text-stone-700 text-xs py-2 rounded-lg font-bold shadow-sm transition">Download JSON</button>
+                        </div>
+                        <div class="p-4 bg-stone-50 rounded-xl border border-stone-200 hover:border-stone-300 transition">
+                            <h3 class="text-xs font-bold text-stone-800 flex items-center gap-1.5 mb-1">
+                                <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                Backup laden
+                            </h3>
+                            <p class="text-[10px] text-stone-500 mb-3 leading-relaxed">Überschreibt die aktuellen Daten mit einer JSON-Sicherung.</p>
+                            <label class="block w-full bg-stone-800 hover:bg-stone-700 text-white text-center text-xs py-2 rounded-lg font-bold shadow-sm transition cursor-pointer">
+                                <span>Datei auswählen</span>
+                                <input type="file" accept=".json,application/json,text/plain" class="hidden" onchange="importBackup(event)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-orange-50/50 rounded-xl border border-orange-100">
+                        <h3 class="text-xs font-bold text-orange-900 flex items-center gap-1.5 mb-1">✨ Gemini KI-Integration</h3>
+                        <p class="text-[10px] text-orange-700/80 mb-3 leading-relaxed">Für automatische Screenshot-Auswertung wird ein Google Gemini API-Key benötigt (kostenlos).</p>
+                        <input type="password" id="gemini-api-key-input" placeholder="AIzaSy..." class="w-full bg-white border border-orange-200 rounded-lg px-3 py-2 text-stone-900 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition shadow-sm" onchange="saveGeminiApiKey(this.value)">
+                    </div>
+
+                    <div class="pt-4 border-t border-stone-100">
+                        <button onclick="confirmResetAllPrompt()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            Alle Daten unwiderruflich löschen
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-stone-200 z-40 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+        <div class="flex justify-around items-center p-2">
+            <button onclick="switchTab('tab-breeding')" id="nav-mobile-tab-breeding" class="nav-btn-mobile flex flex-col items-center p-2 text-ark-accent w-1/3">
+                <span class="text-xl mb-0.5">🧬</span>
+                <span class="text-[9px] font-bold tracking-wide">Zucht</span>
+            </button>
+            <button onclick="switchTab('tab-bestand')" id="nav-mobile-tab-bestand" class="nav-btn-mobile flex flex-col items-center p-2 text-stone-400 w-1/3">
+                <span class="text-xl mb-0.5">🦖</span>
+                <span class="text-[9px] font-bold tracking-wide">Bestand</span>
+            </button>
+            <button onclick="switchTab('tab-settings')" id="nav-mobile-tab-settings" class="nav-btn-mobile flex flex-col items-center p-2 text-stone-400 w-1/3">
+                <span class="text-xl mb-0.5">⚙️</span>
+                <span class="text-[9px] font-bold tracking-wide">System</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- TOASTS -->
+    <div id="toast-container" class="fixed top-16 md:top-auto md:bottom-6 right-4 left-4 md:left-auto z-[100] flex flex-col gap-2 pointer-events-none items-end"></div>
+
+    <!-- DIALOG OVERLAYS -->
+    <div id="overlay-bg" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 hidden transition-opacity duration-200 opacity-0"></div>
+
+    <!-- Confirm Modal -->
+    <div id="modal-confirm" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4 pointer-events-none">
+        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5 pointer-events-auto transform transition-all duration-200 scale-95 opacity-0 border border-stone-100">
+            <h3 id="confirm-title" class="text-sm font-extrabold text-stone-900 uppercase tracking-wide mb-2"></h3>
+            <p id="confirm-message" class="text-xs text-stone-600 leading-relaxed mb-5"></p>
+            <div class="flex gap-2 justify-end">
+                <button id="btn-confirm-cancel" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition">Abbrechen</button>
+                <button id="btn-confirm-ok" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition shadow-sm">Bestätigen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prompt Modal -->
+    <div id="modal-prompt" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4 pointer-events-none">
+        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5 pointer-events-auto transform transition-all duration-200 scale-95 opacity-0 border border-stone-100">
+            <h3 id="prompt-title" class="text-sm font-extrabold text-stone-900 uppercase tracking-wide mb-2"></h3>
+            <p id="prompt-message" class="text-xs text-stone-600 leading-relaxed mb-4"></p>
+            <input type="text" id="prompt-input" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-ark-accent focus:bg-white transition mb-5">
+            <div class="flex gap-2 justify-end">
+                <button id="btn-prompt-cancel" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition">Abbrechen</button>
+                <button id="btn-prompt-ok" class="px-4 py-2 bg-ark-accent hover:bg-orange-700 text-white text-xs font-bold rounded-xl transition shadow-sm">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Line Modal -->
+    <div id="modal-add-line" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4 pointer-events-none">
+        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5 pointer-events-auto transform transition-all duration-200 scale-95 opacity-0 border border-stone-100">
+            <h3 class="text-sm font-extrabold text-stone-900 uppercase tracking-wide mb-4">Neues Projekt</h3>
+            <label class="block text-[10px] font-bold text-stone-500 uppercase mb-1.5 ml-1">Name der Zuchtlinie</label>
+            <input type="text" id="input-line-name" placeholder="z.B. Boss Rex Melee" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900 focus:bg-white transition mb-5">
+            <div class="flex gap-2 justify-end">
+                <button onclick="closeModal('modal-add-line')" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition">Abbrechen</button>
+                <button onclick="createNewLine()" class="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl transition shadow-sm">Erstellen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copy to Line Modal -->
+    <div id="modal-copy-bestand" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4 pointer-events-none">
+        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5 pointer-events-auto transform transition-all duration-200 scale-95 opacity-0 border border-stone-100">
+            <h3 class="text-sm font-extrabold text-stone-900 uppercase tracking-wide mb-2">In Projekt kopieren</h3>
+            <p class="text-xs text-stone-600 leading-relaxed mb-4">Wähle die Zuchtlinie, um diesen Stamm als Elternteil hinzuzufügen.</p>
+            <input type="hidden" id="copy-bestand-id">
+            <select id="select-copy-target-line" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-ark-accent focus:bg-white transition mb-5 appearance-none cursor-pointer"></select>
+            <div class="flex gap-2 justify-end">
+                <button onclick="closeModal('modal-copy-bestand')" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition">Abbrechen</button>
+                <button onclick="executeCopyBestandToLine()" class="px-4 py-2 bg-ark-accent hover:bg-orange-700 text-white text-xs font-bold rounded-xl transition shadow-sm">Einfügen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Scan Loading Overlay -->
+    <div id="scan-loading-overlay" class="fixed inset-0 bg-stone-950/90 backdrop-blur-sm z-[200] hidden flex-col items-center justify-center p-6 text-white transition-opacity duration-300 opacity-0">
+        <div class="relative w-24 h-24 mb-6">
+            <svg class="absolute inset-0 w-full h-full text-stone-800 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <div class="absolute inset-0 flex items-center justify-center text-3xl animate-pulse">📸</div>
+        </div>
+        <h3 class="font-bold tracking-widest uppercase text-sm mb-2 font-mono text-orange-400">Analysiere Bilddaten</h3>
+        <p class="text-xs text-stone-400 max-w-[250px] text-center leading-relaxed">Gemini extrahiert die Statuswerte. Dies dauert einen kurzen Moment...</p>
+        <img id="scan-loading-preview-img" class="mt-8 w-24 h-24 object-cover rounded-xl border-2 border-stone-800 opacity-50 shadow-2xl" src="">
+    </div>
+
+    <script>
+        // Data Schema
+        const STAT_KEYS = ['hp', 'stamina', 'oxygen', 'food', 'weight', 'melee'];
+        const STAT_LABELS = { hp: 'HP', stamina: 'Ausdauer', oxygen: 'Sauerstoff', food: 'Nahrung', weight: 'Gewicht', melee: 'Melee' };
+        
+        let appState = { lines: [], bestand: [] };
+
+        // Initialization
+        window.onload = () => {
+            loadState();
+            if (appState.lines.length === 0 && appState.bestand.length === 0) initDefaultData();
+            
+            const savedKey = localStorage.getItem('ark_gemini_api_key');
+            if (savedKey) document.getElementById('gemini-api-key-input').value = savedKey;
+            
+            renderAllLines();
+            renderBestand();
+        };
+
+        function loadState() {
+            try {
+                const data = localStorage.getItem('ark_hub_v4');
+                if (data) {
+                    appState = JSON.parse(data);
+                } else {
+                    // Automatische Migration der Daten aus der alten Version
+                    const legacyData = localStorage.getItem('ark_breeding_state_warm_v3');
+                    if (legacyData) {
+                        appState = JSON.parse(legacyData);
+                        saveState();
+                        setTimeout(() => showToast('Alte Daten automatisch übernommen!', 'success'), 800);
+                    }
+                }
+                if (!appState.lines) appState.lines = [];
+                if (!appState.bestand) appState.bestand = [];
+            } catch (e) { console.error("Load error", e); }
+        }
+
+        function saveState() {
+            localStorage.setItem('ark_hub_v4', JSON.stringify(appState));
+        }
+
+        function initDefaultData() {
+            appState.lines.push({
+                id: 'line_' + Date.now(),
+                name: 'Rex Boss Armee',
+                dinos: [
+                    { id: 'd1', name: 'Adam', gender: 'M', hp: 44, stamina: 30, oxygen: 10, food: 20, weight: 35, melee: 49, isTrash: false },
+                    { id: 'd2', name: 'Eva', gender: 'W', hp: 35, stamina: 42, oxygen: 10, food: 20, weight: 30, melee: 30, isTrash: false }
+                ]
+            });
+            saveState();
+        }
+
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = type === 'success' ? 'bg-stone-900 text-white' : 'bg-red-600 text-white';
+            const icon = type === 'success' ? '✓' : '⚠';
+            
+            toast.className = `${colors} px-4 py-3 rounded-xl shadow-xl text-xs font-bold flex items-center gap-3 transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `<span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px]">${icon}</span> <span>${msg}</span>`;
+            
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Custom UI Dialogs (Replacing alert/confirm)
+        function openModal(id) {
+            const overlay = document.getElementById('overlay-bg');
+            const modal = document.getElementById(id);
+            const content = modal.firstElementChild;
+            
+            overlay.classList.remove('hidden');
+            modal.classList.remove('hidden');
+            
+            // Trigger animation
+            requestAnimationFrame(() => {
+                overlay.classList.remove('opacity-0');
+                content.classList.remove('opacity-0', 'scale-95');
+            });
+        }
+
+        function closeModal(id) {
+            const overlay = document.getElementById('overlay-bg');
+            const modal = document.getElementById(id);
+            const content = modal.firstElementChild;
+            
+            overlay.classList.add('opacity-0');
+            content.classList.add('opacity-0', 'scale-95');
+            
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                modal.classList.add('hidden');
+            }, 200); // match transition duration
+        }
+
+        function customConfirm(title, message, callback) {
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-message').textContent = message;
+            
+            const btnOk = document.getElementById('btn-confirm-ok');
+            const btnCancel = document.getElementById('btn-confirm-cancel');
+            
+            const cleanup = () => { closeModal('modal-confirm'); };
+            
+            btnOk.onclick = () => { cleanup(); callback(true); };
+            btnCancel.onclick = () => { cleanup(); callback(false); };
+            
+            openModal('modal-confirm');
+        }
+
+        function customPrompt(title, message, defaultValue, callback) {
+            document.getElementById('prompt-title').textContent = title;
+            document.getElementById('prompt-message').textContent = message;
+            const input = document.getElementById('prompt-input');
+            input.value = defaultValue;
+            
+            const btnOk = document.getElementById('btn-prompt-ok');
+            const btnCancel = document.getElementById('btn-prompt-cancel');
+            
+            const cleanup = () => { closeModal('modal-prompt'); };
+            
+            btnOk.onclick = () => { cleanup(); callback(input.value); };
+            btnCancel.onclick = () => { cleanup(); callback(null); };
+            
+            openModal('modal-prompt');
+            setTimeout(() => input.focus(), 100);
+        }
+
+        // Tabs
+        function switchTab(tabId) {
+            ['tab-breeding', 'tab-bestand', 'tab-settings'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+
+            // Update Desktop Nav
+            document.querySelectorAll('.nav-btn-desktop').forEach(btn => {
+                if (btn.id === `btn-${tabId}`) {
+                    btn.className = "nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all bg-white text-ark-accent shadow-sm ring-1 ring-stone-200";
+                } else {
+                    btn.className = "nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all text-stone-500 hover:text-stone-900";
+                }
+            });
+
+            // Update Mobile Nav
+            document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
+                if (btn.id === `nav-mobile-${tabId}`) {
+                    btn.className = "nav-btn-mobile flex flex-col items-center p-2 text-ark-accent w-1/3";
+                    btn.querySelector('span:last-child').classList.add('text-ark-accent');
+                } else {
+                    btn.className = "nav-btn-mobile flex flex-col items-center p-2 text-stone-400 w-1/3 hover:text-stone-600 transition";
+                    btn.querySelector('span:last-child').classList.remove('text-ark-accent');
+                }
+            });
+        }
+
+        function createNewLine() {
+            const inp = document.getElementById('input-line-name');
+            const name = inp.value.trim() || 'Unbenanntes Projekt';
+            appState.lines.unshift({ id: 'line_' + Date.now(), name, dinos: [] });
+            inp.value = '';
+            saveState();
+            closeModal('modal-add-line');
+            renderAllLines();
+            showToast('Projekt erstellt');
+        }
+
+        function deleteLine(id, skipConfirm = false) {
+            const performDelete = () => {
+                appState.lines = appState.lines.filter(l => l.id !== id);
+                saveState();
+                renderAllLines();
+                showToast('Projekt gelöscht');
+            };
+
+            if (skipConfirm) {
+                performDelete();
+            } else {
+                customConfirm('Projekt löschen', 'Bist du sicher? Alle Dinos in dieser Ansicht gehen verloren.', (ok) => {
+                    if (ok) performDelete();
+                });
+            }
+        }
+
+        function addDino(lineId) {
+            const line = appState.lines.find(l => l.id === lineId);
+            if (!line) return;
+            const newDino = {
+                id: 'dino_' + Date.now() + Math.random().toString(36).substring(2,5),
+                name: `Dino #${line.dinos.length + 1}`,
+                gender: 'M',
+                hp: 0, stamina: 0, oxygen: 0, food: 0, weight: 0, melee: 0,
+                isTrash: false
+            };
+            line.dinos.push(newDino);
+            saveState();
+            renderAllLines(); // Structural change, requires full render
+            
+            // Focus new name input safely
+            setTimeout(() => {
+                const el = document.getElementById(`name_${newDino.id}`);
+                if (el) { el.focus(); el.select(); }
+            }, 50);
+        }
+
+        function removeDino(lineId, dinoId) {
+            customConfirm('Dino entfernen', 'Möchtest du dieses Tier entfernen?', (ok) => {
+                if(ok) {
+                    const line = appState.lines.find(l => l.id === lineId);
+                    line.dinos = line.dinos.filter(d => d.id !== dinoId);
+                    saveState();
+                    renderAllLines();
+                }
+            });
+        }
+
+        function toggleGender(lineId, dinoId) {
+            const line = appState.lines.find(l => l.id === lineId);
+            const dino = line.dinos.find(d => d.id === dinoId);
+            dino.gender = dino.gender === 'M' ? 'W' : 'M';
+            saveState();
+            
+            // Update UI directly instead of full render
+            const btn = document.getElementById(`gender_btn_${dinoId}`);
+            if (btn) {
+                btn.innerHTML = dino.gender === 'M' ? '♂' : '♀';
+                btn.className = dino.gender === 'M' 
+                    ? 'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition bg-sky-100 text-sky-700 hover:bg-sky-200'
+                    : 'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition bg-pink-100 text-pink-700 hover:bg-pink-200';
+            }
+            updateSmartVisuals(lineId); // Re-run suggestions
+        }
+
+        function handleNameInput(lineId, dinoId, val) {
+            const dino = appState.lines.find(l => l.id === lineId).dinos.find(d => d.id === dinoId);
+            dino.name = val.trim();
+            saveState();
+            updateSuggestionsDOM(lineId); // names might be in suggestions
+        }
+
+        // SMART DOM UPDATE ALGORITHM (Fixes focus loss)
+        function handleStatInput(lineId, dinoId, stat, val) {
+            const numVal = parseInt(val) || 0;
+            const line = appState.lines.find(l => l.id === lineId);
+            const dino = line.dinos.find(d => d.id === dinoId);
+            dino[stat] = numVal;
+            saveState();
+
+            // Calculate and update local level field immediately
+            let totalStats = 0;
+            STAT_KEYS.forEach(k => totalStats += (dino[k] || 0));
+            const lvlInput = document.getElementById(`lvl_${dinoId}`);
+            if (lvlInput) lvlInput.value = totalStats + 1;
+
+            // Trigger the smart visual update for the rest of the table
+            updateSmartVisuals(lineId);
+        }
+
+        function updateSmartVisuals(lineId) {
+            const line = appState.lines.find(l => l.id === lineId);
+            if (!line) return;
+
+            // 1. Calculate new Tops
+            const maxStats = {};
+            STAT_KEYS.forEach(stat => {
+                maxStats[stat] = line.dinos.length ? Math.max(...line.dinos.map(d => d[stat] || 0)) : 0;
+                // Update Top Label in first col
+                const topLabel = document.getElementById(`top_lbl_${lineId}_${stat}`);
+                if (topLabel) topLabel.textContent = maxStats[stat];
+            });
+
+            // Calculate hypothetical max level
+            let sumMax = 0;
+            STAT_KEYS.forEach(s => sumMax += maxStats[s]);
+            const topLvlLabel = document.getElementById(`top_lbl_${lineId}_level`);
+            if (topLvlLabel) topLvlLabel.textContent = line.dinos.length ? (sumMax + 1) : 0;
+
+            // 2. Loop all dinos to update styling classes based on new tops
+            line.dinos.forEach(dino => {
+                let hasTop = false;
+                
+                // Check stats
+                STAT_KEYS.forEach(stat => {
+                    const inputEl = document.getElementById(`stat_${dino.id}_${stat}`);
+                    if (!inputEl) return;
+                    
+                    const isMax = (dino[stat] === maxStats[stat] && maxStats[stat] > 0);
+                    if (isMax) hasTop = true;
+
+                    // Apply visual styling dynamically
+                    if (isMax && !dino.isTrash) {
+                        inputEl.className = "w-full text-center bg-orange-100/50 border border-orange-300 text-orange-900 font-extrabold py-1.5 rounded-lg text-xs font-mono transition outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white";
+                    } else {
+                        inputEl.className = "w-full text-center bg-white border border-stone-200 text-stone-600 font-medium py-1.5 rounded-lg text-xs font-mono transition outline-none focus:ring-2 focus:ring-ark-accent focus:border-transparent";
+                    }
+                });
+
+                // Update Trash State
+                dino.isTrash = !hasTop && line.dinos.length > 0;
+                
+                // Toggle trash indicator DOM
+                const trashInd = document.getElementById(`trash_ind_${dino.id}`);
+                const colGroup = document.querySelectorAll(`.col_grp_${dino.id}`);
+                
+                if (dino.isTrash) {
+                    if (trashInd) trashInd.classList.remove('hidden');
+                    colGroup.forEach(el => el.classList.add('opacity-40', 'bg-red-50/30'));
+                } else {
+                    if (trashInd) trashInd.classList.add('hidden');
+                    colGroup.forEach(el => el.classList.remove('opacity-40', 'bg-red-50/30'));
+                }
+            });
+
+            // 3. Re-render Suggestions
+            updateSuggestionsDOM(lineId);
+        }
+
+        function renderAllLines() {
+            const container = document.getElementById('lines-container');
+            container.innerHTML = '';
+
+            if (appState.lines.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white border-2 border-dashed border-stone-200 rounded-2xl p-10 flex flex-col items-center justify-center text-center">
+                        <div class="text-4xl mb-3 text-stone-300">🧬</div>
+                        <h3 class="text-sm font-bold text-stone-700">Keine Zuchtprojekte</h3>
+                        <p class="text-xs text-stone-500 mt-1 mb-4">Erstelle dein erstes Projekt, um Stat-Werte zu tracken.</p>
+                        <button onclick="openModal('modal-add-line')" class="bg-stone-900 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm">+ Neues Projekt</button>
+                    </div>`;
+                return;
+            }
+
+            appState.lines.forEach(line => {
+                // Calculate Tops
+                const maxStats = {};
+                let hasAnyData = line.dinos.length > 0;
+                STAT_KEYS.forEach(stat => { maxStats[stat] = hasAnyData ? Math.max(...line.dinos.map(d => d[stat] || 0)) : 0; });
+                let sumMax = 0; STAT_KEYS.forEach(s => sumMax += maxStats[s]);
+                const topLevel = hasAnyData ? (sumMax + 1) : 0;
+
+                // Sort dinos (Active first, Trash later)
+                line.dinos.forEach(d => {
+                    let hasTop = false;
+                    STAT_KEYS.forEach(s => { if(d[s] === maxStats[s] && maxStats[s] > 0) hasTop = true; });
+                    d.isTrash = !hasTop && hasAnyData;
+                });
+                
+                const activeDinos = line.dinos.filter(d => !d.isTrash);
+                const trashDinos = line.dinos.filter(d => d.isTrash);
+                const cols = [...activeDinos, { isPlus: true }, ...trashDinos];
+
+                // Build Table Headers
+                let thHtml = '';
+                cols.forEach(col => {
+                    if (col.isPlus) {
+                        thHtml += `
+                            <th class="p-2 border-b border-stone-200 align-bottom w-12 bg-stone-50/50">
+                                <button onclick="addDino('${line.id}')" class="w-8 h-8 mx-auto bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-sm transform active:scale-90 transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                                </button>
+                            </th>`;
+                    } else {
+                        const d = col;
+                        const bgCol = d.isTrash ? 'bg-red-50/30 opacity-40' : 'bg-white';
+                        const gBtnClass = d.gender === 'M' ? 'bg-sky-100 text-sky-700 hover:bg-sky-200' : 'bg-pink-100 text-pink-700 hover:bg-pink-200';
+                        const gIcon = d.gender === 'M' ? '♂' : '♀';
+                        
+                        thHtml += `
+                            <th class="p-2 border-b border-stone-200 min-w-[130px] col_grp_${d.id} ${bgCol} transition-all duration-300">
+                                <div class="flex flex-col gap-2">
+                                    <div class="flex justify-between items-center px-1">
+                                        <button id="gender_btn_${d.id}" onclick="toggleGender('${line.id}', '${d.id}')" class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition ${gBtnClass}">${gIcon}</button>
+                                        <span id="trash_ind_${d.id}" class="text-[9px] font-black tracking-tight text-red-500 bg-red-100 px-1.5 py-0.5 rounded ${d.isTrash ? '' : 'hidden'}">🗑️ ALT</span>
+                                        <button onclick="removeDino('${line.id}', '${d.id}')" class="text-stone-300 hover:text-red-500 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                    </div>
+                                    <input type="text" id="name_${d.id}" value="${d.name}" oninput="handleNameInput('${line.id}', '${d.id}', this.value)" placeholder="Name..." class="w-full bg-transparent text-sm font-bold text-center border-b-2 border-transparent focus:border-ark-accent outline-none pb-0.5 transition text-stone-800">
+                                </div>
+                            </th>`;
+                    }
+                });
+
+                // Build Table Rows
+                let rowsHtml = '';
+                [...STAT_KEYS, 'level'].forEach(stat => {
+                    const isLvl = stat === 'level';
+                    const topVal = isLvl ? topLevel : maxStats[stat];
+                    
+                    let tdHtml = '';
+                    cols.forEach(col => {
+                        if (col.isPlus) {
+                            tdHtml += `<td class="p-1 border-b border-stone-100 bg-stone-50/30"><div class="w-px h-4 bg-stone-200 mx-auto"></div></td>`;
+                        } else {
+                            const d = col;
+                            const bgCol = d.isTrash ? 'bg-red-50/30 opacity-40' : '';
+                            
+                            if (isLvl) {
+                                let t = 0; STAT_KEYS.forEach(k => t+=(d[k]||0));
+                                tdHtml += `<td class="p-1.5 border-b border-stone-100 col_grp_${d.id} ${bgCol}"><input disabled id="lvl_${d.id}" value="${t+1}" class="w-full text-center bg-stone-100 text-stone-500 font-bold py-1.5 rounded-lg text-xs font-mono"></td>`;
+                            } else {
+                                const isMax = (!d.isTrash && d[stat] === topVal && topVal > 0);
+                                const inputClass = isMax 
+                                    ? "w-full text-center bg-orange-100/50 border border-orange-300 text-orange-900 font-extrabold py-1.5 rounded-lg text-xs font-mono transition outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white"
+                                    : "w-full text-center bg-white border border-stone-200 text-stone-600 font-medium py-1.5 rounded-lg text-xs font-mono transition outline-none focus:ring-2 focus:ring-ark-accent focus:border-transparent";
+                                
+                                tdHtml += `<td class="p-1.5 border-b border-stone-100 col_grp_${d.id} ${bgCol}">
+                                    <input type="number" id="stat_${d.id}_${stat}" value="${d[stat]||0}" oninput="handleStatInput('${line.id}', '${d.id}', '${stat}', this.value)" onfocus="this.select()" class="${inputClass}">
+                                </td>`;
+                            }
+                        }
+                    });
+
+                    const statLabel = isLvl ? 'Level' : STAT_LABELS[stat];
+                    rowsHtml += `
+                        <tr class="hover:bg-stone-50/50 transition-colors group">
+                            <td class="p-2 border-r border-stone-200 sticky-col bg-white">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] font-bold text-stone-400 uppercase tracking-widest">${statLabel}</span>
+                                    <span class="text-xs font-black text-stone-800 font-mono tracking-tight mt-0.5" id="top_lbl_${line.id}_${stat}">${topVal}</span>
+                                </div>
+                            </td>
+                            ${tdHtml}
+                        </tr>`;
+                });
+
+                // Wrapper
+                const section = document.createElement('div');
+                section.className = "bg-white rounded-2xl border border-ark-border shadow-soft overflow-hidden";
+                section.innerHTML = `
+                    <div class="p-4 border-b border-stone-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-stone-50/50">
+                        <h3 class="text-base font-extrabold text-stone-900 flex items-center gap-2">
+                            <span class="bg-orange-100 text-orange-600 p-1.5 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg></span>
+                            ${line.name}
+                        </h3>
+                        <div class="flex gap-1.5 w-full md:w-auto overflow-x-auto no-scrollbar pb-1 md:pb-0">
+                            <label class="shrink-0 bg-stone-100 hover:bg-stone-200 text-stone-700 text-[10px] font-bold py-1.5 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer transition">
+                                <span>📸 Scannen</span>
+                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="startGeminiScan(event, '${line.id}')">
+                            </label>
+                            <button onclick="saveToBestand('${line.id}')" class="shrink-0 bg-stone-900 hover:bg-stone-800 text-white text-[10px] font-bold py-1.5 px-3 rounded-lg flex items-center gap-1.5 transition">💾 Archivieren</button>
+                            <button onclick="deleteLine('${line.id}')" class="shrink-0 text-stone-400 hover:bg-red-50 hover:text-red-600 px-2 rounded-lg transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 xl:grid-cols-4">
+                        <div class="xl:col-span-3 border-r border-stone-100 table-container">
+                            <div class="overflow-x-auto w-full no-scrollbar relative">
+                                <table class="w-full text-left border-collapse min-w-max">
+                                    <thead><tr class="bg-stone-50/30"><th class="sticky-col sticky-header bg-white border-r border-b border-stone-200 w-[70px]"></th>${thHtml}</tr></thead>
+                                    <tbody class="divide-y divide-stone-100 bg-white">${rowsHtml}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Suggestions Container (Updated Dynamically) -->
+                        <div class="bg-stone-50 p-4" id="sugg_container_${line.id}">
+                            <!-- Content generated by updateSuggestionsDOM -->
+                        </div>
+                    </div>
+                `;
+                container.appendChild(section);
+                
+                // Initial generation of suggestions
+                updateSuggestionsDOM(line.id);
+            });
+
+            // "Neues Projekt" Button am Ende der Liste einfügen
+            const addLineCard = document.createElement('div');
+            addLineCard.className = "flex justify-center pt-4";
+            addLineCard.innerHTML = `
+                <button onclick="openModal('modal-add-line')" class="bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold py-3.5 px-6 rounded-xl shadow-soft transition transform active:scale-95 flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                    Neues Projekt hinzufügen
+                </button>
+            `;
+            container.appendChild(addLineCard);
+        }
+
+        // Dedicated Suggestions Generator Logic
+        function updateSuggestionsDOM(lineId) {
+            const container = document.getElementById(`sugg_container_${lineId}`);
+            if (!container) return;
+            
+            const line = appState.lines.find(l => l.id === lineId);
+            if (!line) return;
+
+            const active = line.dinos.filter(d => !d.isTrash);
+            
+            // Calculate Tops again (fast enough for this small array)
+            const maxStats = {};
+            STAT_KEYS.forEach(s => maxStats[s] = active.length ? Math.max(...active.map(d => d[s] || 0)) : 0);
+
+            let html = `<div class="flex items-center gap-2 mb-3"><div class="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div><h4 class="text-xs font-bold text-stone-800 uppercase tracking-wide">Paarungs-KI</h4></div>`;
+
+            if (active.length < 2) {
+                html += `<div class="bg-white border border-stone-200 rounded-xl p-3 text-[10px] text-stone-500 text-center shadow-sm">Mindestens 2 aktive Dinos benötigt.</div>`;
+                container.innerHTML = html;
+                return;
+            }
+
+            const getBests = (d) => STAT_KEYS.filter(s => d[s] === maxStats[s] && maxStats[s] > 0);
+            const pairs = [];
+
+            for (let i = 0; i < active.length; i++) {
+                for (let j = i + 1; j < active.length; j++) {
+                    const d1 = active[i], d2 = active[j];
+                    const b1 = getBests(d1), b2 = getBests(d2);
+                    const combined = [...new Set([...b1, ...b2])];
+
+                    if (combined.length > b1.length && combined.length > b2.length) {
+                        pairs.push({ d1, d2, b1, b2, combined, score: combined.length });
+                    }
+                }
+            }
+
+            pairs.sort((a, b) => b.score - a.score);
+            const topPairs = pairs.slice(0, 2);
+
+            if (topPairs.length === 0) {
+                html += `<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-[10px] text-emerald-700 font-bold text-center shadow-sm">Werte sind optimal vereint!</div>`;
+            } else {
+                html += `<div class="space-y-2">`;
+                topPairs.forEach((p, idx) => {
+                    const warn = p.d1.gender === p.d2.gender ? `<span class="bg-red-100 text-red-600 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ml-2">Gleiches Geschlecht!</span>` : '';
+                    
+                    html += `
+                        <div class="bg-white rounded-xl border border-stone-200 p-3 shadow-sm hover:shadow transition">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="text-[9px] font-extrabold text-stone-400 uppercase tracking-wider">Option ${idx+1}</span>
+                                <span class="text-[9px] font-black bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded font-mono">${p.combined.length}/${STAT_KEYS.length} Werten</span>
+                            </div>
+                            <div class="space-y-1 mb-2">
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="font-bold truncate max-w-[80px] ${p.d1.gender==='M'?'text-sky-600':'text-pink-600'}">${p.d1.name}</span>
+                                    <span class="text-[8px] font-mono text-stone-400">${p.b1.map(s=>STAT_LABELS[s].substring(0,3)).join(', ')}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="font-bold truncate max-w-[80px] ${p.d2.gender==='M'?'text-sky-600':'text-pink-600'}">${p.d2.name}</span>
+                                    <span class="text-[8px] font-mono text-stone-400">${p.b2.map(s=>STAT_LABELS[s].substring(0,3)).join(', ')}</span>
+                                </div>
+                            </div>
+                            <div class="bg-stone-50 rounded-lg p-1.5 border border-stone-100">
+                                <span class="block text-[8px] text-stone-500 font-bold mb-0.5 uppercase">Ergebnis-Pool: ${warn}</span>
+                                <span class="text-[9px] font-bold text-ark-accent font-mono">${p.combined.map(s=>STAT_LABELS[s]).join(', ')}</span>
+                            </div>
+                        </div>`;
+                });
+                html += `</div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function saveToBestand(lineId) {
+            const line = appState.lines.find(l => l.id === lineId);
+            const active = line.dinos.filter(d => !d.isTrash);
+            if (active.length === 0) return showToast('Keine aktiven Dinos vorhanden', 'error');
+
+            const tops = {};
+            STAT_KEYS.forEach(s => tops[s] = Math.max(...active.map(d => d[s] || 0)));
+            let lvl = 0; STAT_KEYS.forEach(s => lvl += tops[s]); tops.level = lvl + 1;
+
+            customPrompt('Bestand sichern', 'Unter welchem Namen soll dieser Meilenstein gespeichert werden?', `${line.name} Master`, (name) => {
+                if (name) {
+                    appState.bestand.unshift({
+                        id: 'b_' + Date.now(),
+                        lineName: line.name,
+                        displayName: name,
+                        date: new Date().toLocaleDateString('de-DE'),
+                        stats: tops
+                    });
+                    saveState();
+                    showToast('Im Bestand archiviert!');
+                    renderBestand();
+
+                    // Nachfrage, ob die aktive Linie nach erfolgreicher Archivierung gelöscht werden soll
+                    setTimeout(() => {
+                        customConfirm(
+                            'Projekt löschen?',
+                            `Möchtest du das ursprüngliche Projekt "${line.name}" jetzt löschen?`,
+                            (confirmDelete) => {
+                                if (confirmDelete) {
+                                    deleteLine(lineId, true);
+                                }
+                            }
+                        );
+                    }, 400); // Kurze Verzögerung, damit die Modals flüssig nacheinander erscheinen
+                }
+            });
+        }
+
+        function renderBestand() {
+            const grid = document.getElementById('bestand-grid');
+            const ph = document.getElementById('bestand-placeholder');
+            grid.innerHTML = '';
+
+            if (appState.bestand.length === 0) {
+                ph.classList.remove('hidden');
+                return;
+            }
+            ph.classList.add('hidden');
+
+            appState.bestand.forEach(item => {
+                let statsHtml = '';
+                [...STAT_KEYS, 'level'].forEach(s => {
+                    const isLvl = s === 'level';
+                    statsHtml += `
+                        <div class="bg-stone-50 rounded p-1.5 text-center border border-stone-100 ${isLvl ? 'col-span-2 bg-orange-50 border-orange-100' : ''}">
+                            <span class="block text-[8px] uppercase text-stone-400 font-bold tracking-widest">${isLvl ? 'Level' : STAT_LABELS[s]}</span>
+                            <span class="text-xs font-black font-mono text-stone-700 ${isLvl ? 'text-orange-600' : ''}">${item.stats[s]||0}</span>
+                        </div>`;
+                });
+
+                grid.innerHTML += `
+                    <div class="bg-white rounded-2xl border border-ark-border shadow-soft p-4 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="text-sm font-extrabold text-stone-900">${item.displayName}</h3>
+                                    <span class="text-[9px] text-stone-400 uppercase tracking-widest font-bold block mt-0.5">${item.lineName} • ${item.date}</span>
+                                </div>
+                                <button onclick="delBestand('${item.id}')" class="text-stone-300 hover:text-red-500 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                            </div>
+                            <div class="grid grid-cols-4 gap-1.5 mb-4">${statsHtml}</div>
+                        </div>
+                        <button onclick="openCopyModal('${item.id}')" class="w-full bg-stone-900 hover:bg-stone-800 text-white text-[10px] font-bold py-2 rounded-xl transition flex justify-center items-center gap-1.5 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                            In Projekt laden
+                        </button>
+                    </div>`;
+            });
+        }
+
+        function delBestand(id) {
+            customConfirm('Löschen', 'Archivierten Eintrag entfernen?', (ok) => {
+                if(ok) {
+                    appState.bestand = appState.bestand.filter(b => b.id !== id);
+                    saveState(); renderBestand();
+                }
+            });
+        }
+
+        function openCopyModal(id) {
+            document.getElementById('copy-bestand-id').value = id;
+            const sel = document.getElementById('select-copy-target-line');
+            sel.innerHTML = `<option value="NEW">➕ Als neues Projekt anlegen</option>`;
+            appState.lines.forEach(l => sel.innerHTML += `<option value="${l.id}">🧬 ${l.name}</option>`);
+            openModal('modal-copy-bestand');
+        }
+
+        function executeCopyBestandToLine() {
+            const bId = document.getElementById('copy-bestand-id').value;
+            const targetId = document.getElementById('select-copy-target-line').value;
+            const item = appState.bestand.find(b => b.id === bId);
+            
+            let targetLine;
+            if (targetId === 'NEW') {
+                targetLine = { id: 'line_' + Date.now(), name: `${item.displayName} Zucht`, dinos: [] };
+                appState.lines.unshift(targetLine);
+            } else {
+                targetLine = appState.lines.find(l => l.id === targetId);
+            }
+
+            let lvl = 0; STAT_KEYS.forEach(s => lvl += item.stats[s]);
+            
+            targetLine.dinos.push({
+                id: 'dino_' + Date.now(),
+                name: `${item.displayName} Stamm`,
+                gender: 'M',
+                hp: item.stats.hp, stamina: item.stats.stamina, oxygen: item.stats.oxygen, 
+                food: item.stats.food, weight: item.stats.weight, melee: item.stats.melee,
+                isTrash: false
+            });
+
+            saveState();
+            closeModal('modal-copy-bestand');
+            renderAllLines();
+            switchTab('tab-breeding');
+            showToast('Erfolgreich geladen!');
+        }
+
+        function clearBestandPrompt() {
+            customConfirm('Bestand leeren', 'Alles löschen?', ok => {
+                if(ok) { appState.bestand = []; saveState(); renderBestand(); }
+            });
+        }
+
+        function saveGeminiApiKey(val) {
+            localStorage.setItem('ark_gemini_api_key', val.trim());
+            showToast('API Key lokal gespeichert');
+        }
+
+        function startGeminiScan(e, lineId) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const key = localStorage.getItem('ark_gemini_api_key');
+            if (!key) return showToast('Bitte hinterlege zuerst deinen Gemini API-Key in den Einstellungen.', 'error');
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const scale = Math.min(800 / img.width, 800 / img.height, 1);
+                    canvas.width = img.width * scale; canvas.height = img.height * scale;
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    const base64 = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    // Show Loading
+                    document.getElementById('scan-loading-preview-img').src = base64;
+                    const overlay = document.getElementById('scan-loading-overlay');
+                    overlay.classList.remove('hidden');
+                    requestAnimationFrame(() => overlay.classList.remove('opacity-0'));
+
+                    callGeminiAPI(base64.split(',')[1], lineId, key);
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+
+        async function callGeminiAPI(base64Data, lineId, key) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+            const prompt = `Extract ARK dinosaur stats from image. Return ONLY pure JSON. Schema: {"hp": number, "stamina": number, "oxygen": number, "food": number, "weight": number, "melee": number, "gender": "M" or "W"}. Find wild points if visible, else raw values. Map logically.`;
+
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: 'image/jpeg', data: base64Data } }] }],
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+
+                const data = await res.json();
+                const overlay = document.getElementById('scan-loading-overlay');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    const stats = JSON.parse(data.candidates[0].content.parts[0].text);
+                    applyScannedStats(stats, lineId);
+                } else {
+                    throw new Error("Invalid response");
+                }
+            } catch (err) {
+                const overlay = document.getElementById('scan-loading-overlay');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+                showToast('Scan fehlgeschlagen. Bild unleserlich oder API-Limit erreicht.', 'error');
+            }
+        }
+
+        function applyScannedStats(stats, lineId) {
+            const line = appState.lines.find(l => l.id === lineId);
+            line.dinos.push({
+                id: 'dino_' + Date.now(),
+                name: 'Gescannter Dino',
+                gender: stats.gender === 'W' ? 'W' : 'M',
+                hp: stats.hp || 0, stamina: stats.stamina || 0, oxygen: stats.oxygen || 0,
+                food: stats.food || 0, weight: stats.weight || 0, melee: stats.melee || 0,
+                isTrash: false
+            });
+            saveState();
+            renderAllLines();
+            showToast('Daten erfolgreich extrahiert!');
+        }
+
+        // FULL DATABASE EXPORT (Robust Blob download for Mobile)
+        function exportBackup() {
+            try {
+                const jsonString = JSON.stringify(appState, null, 2);
+                const blob = new Blob([jsonString], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                
+                // Formatiertes Datum für Dateiname
+                const dateStr = new Date().toISOString().slice(0, 10);
+                a.href = url; 
+                a.download = `ark_breeder_backup_${dateStr}.json`;
+                
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('Backup erfolgreich heruntergeladen!');
+            } catch(err) {
+                console.error("JSON Export Fehler:", err);
+                showToast('Export fehlgeschlagen!', 'error');
+            }
+        }
+
+        // FULL DATABASE IMPORT (Robust parsing with feedback)
+        function importBackup(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    // Entfernt unsichtbare Zeichen (wie BOM) die den Parser stören könnten
+                    const textContent = ev.target.result.replace(/^\uFEFF/, '').trim();
+                    const state = JSON.parse(textContent);
+                    
+                    if (state && (state.lines || state.bestand)) {
+                        appState.lines = Array.isArray(state.lines) ? state.lines : [];
+                        appState.bestand = Array.isArray(state.bestand) ? state.bestand : [];
+                        saveState();
+                        renderAllLines(); 
+                        renderBestand();
+                        switchTab('tab-breeding');
+                        showToast('Backup erfolgreich geladen!', 'success');
+                    } else {
+                        showToast('Datei enthält keine kompatiblen Ark-Daten.', 'error');
+                    }
+                } catch(err) { 
+                    console.error("Import Fehler:", err);
+                    showToast('Fehlerhaftes Dateiformat (JSON ungültig)', 'error'); 
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        function confirmResetAllPrompt() {
+            customConfirm('Werksreset', 'Alle Daten löschen?', ok => {
+                if(ok) {
+                    localStorage.removeItem('ark_hub_v4');
+                    appState = { lines: [], bestand: [] };
+                    initDefaultData(); renderAllLines(); renderBestand();
+                    showToast('Reset erfolgreich');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
