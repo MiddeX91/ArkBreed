@@ -281,7 +281,7 @@
             if (appState.lines.length === 0 && appState.bestand.length === 0) initDefaultData();
             
             const savedKey = localStorage.getItem('ark_gemini_api_key');
-            if (savedKey) document.getElementById('gemini-api-key-input').value = savedKey;
+            if (savedKey) document.getElementById('gemini-api-key-input').value = savedKey.trim();
             
             renderAllLines();
             renderBestand();
@@ -329,7 +329,7 @@
             const icon = type === 'success' ? '✓' : '⚠';
             
             toast.className = `${colors} px-4 py-3 rounded-xl shadow-xl text-xs font-bold flex items-center gap-3 transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-auto`;
-            toast.innerHTML = `<span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px]">${icon}</span> <span>${msg}</span>`;
+            toast.innerHTML = `<span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px]">${icon}</span> <span class="break-words max-w-[250px]">${msg}</span>`;
             
             container.appendChild(toast);
             requestAnimationFrame(() => {
@@ -339,7 +339,7 @@
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'scale-95');
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, 5000); // Etwas länger anzeigen bei Fehlern
         }
 
         // Custom UI Dialogs (Replacing alert/confirm)
@@ -970,7 +970,7 @@
         function startGeminiScan(e, lineId) {
             const file = e.target.files[0];
             if (!file) return;
-            const key = localStorage.getItem('ark_gemini_api_key');
+            const key = localStorage.getItem('ark_gemini_api_key')?.trim();
             if (!key) return showToast('Bitte hinterlege zuerst deinen Gemini API-Key in den Einstellungen.', 'error');
 
             const reader = new FileReader();
@@ -1017,17 +1017,21 @@
                 overlay.classList.add('opacity-0');
                 setTimeout(() => overlay.classList.add('hidden'), 300);
 
+                if (data.error) {
+                    throw new Error(data.error.message || "Unbekannter Google API-Fehler.");
+                }
+
                 if (data.candidates && data.candidates[0].content.parts[0].text) {
                     const stats = JSON.parse(data.candidates[0].content.parts[0].text);
                     applyScannedStats(stats, lineId);
                 } else {
-                    throw new Error("Invalid response");
+                    throw new Error("Keine analysierbaren Daten in der Gemini-Antwort gefunden.");
                 }
             } catch (err) {
                 const overlay = document.getElementById('scan-loading-overlay');
                 overlay.classList.add('opacity-0');
                 setTimeout(() => overlay.classList.add('hidden'), 300);
-                showToast('Scan fehlgeschlagen. Bild unleserlich oder API-Limit erreicht.', 'error');
+                showToast('Scan fehlgeschlagen: ' + err.message, 'error');
             }
         }
 
