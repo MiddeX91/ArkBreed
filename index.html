@@ -1,34 +1,28 @@
 <!DOCTYPE html>
-<html lang="de" class="antialiased">
+<html lang="de" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ARK: Survival Ascended - Breeding Hub</title>
-    
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['Share Tech Mono', 'monospace'],
-                    },
                     colors: {
                         ark: {
-                            bg: '#f8f6f0',
+                            bg: '#fbfaf7',
                             panel: '#ffffff',
+                            panelHeader: '#f3ede2',
                             accent: '#ea580c',
                             accentHover: '#c2410c',
                             male: '#0284c7',
                             female: '#db2777',
-                            border: '#e5e0d8'
+                            darkBg: '#121212',
+                            darkPanel: '#1e1e1e'
                         }
-                    },
-                    boxShadow: {
-                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                        'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
                     }
                 }
             }
@@ -36,145 +30,178 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
     <style>
         body {
+            font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
-            background-color: theme('colors.ark.bg');
-            background-image: radial-gradient(theme('colors.stone.200') 1px, transparent 0);
-            background-size: 20px 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
+        .tech-font { font-family: 'Share Tech Mono', monospace; }
         
-        /* Sticky Table Configuration */
-        .table-container {
-            position: relative;
-            z-index: 1;
-        }
+        /* Light Mode Body BG */
+        body { background-color: theme('colors.ark.bg'); }
+        /* Dark Mode Body BG */
+        html.dark body { background-color: theme('colors.ark.darkBg'); color: #f3f4f6; }
+
+        /* Sticky Column Configuration */
         .sticky-col {
             position: sticky;
             left: 0;
-            background-color: #faf8f5 !important;
             z-index: 10;
-            border-right: 1px solid theme('colors.ark.border');
-        }
-        .sticky-header {
-            z-index: 11;
         }
         
-        /* Hide Scrollbar but keep functionality */
+        /* Light Mode Sticky Col */
+        .sticky-col { background-color: #ffffff; border-right: 1px solid #e5e7eb; }
+        th.sticky-col { background-color: #f9fafb !important; }
+        
+        /* Dark Mode Sticky Col */
+        html.dark .sticky-col { background-color: #1e1e1e !important; border-right: 1px solid #374151; }
+        html.dark th.sticky-col { background-color: #2a2a2a !important; }
+
+        /* Hide Scrollbar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Custom Input Number hiding arrows */
+        /* Remove Number Input Arrows */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none; margin: 0;
         }
         input[type="number"] { -moz-appearance: textfield; }
-
-        /* Modal Transitions */
-        .modal-enter { opacity: 0; transform: scale(0.95); }
-        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 200ms ease-out, transform 200ms ease-out; }
-        .modal-exit { opacity: 1; transform: scale(1); }
-        .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 150ms ease-in, transform 150ms ease-in; }
     </style>
 </head>
-<body class="text-stone-800 min-h-screen flex flex-col justify-between pb-20 md:pb-6 selection:bg-ark-accent selection:text-white">
 
-    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-ark-border shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl shadow-sm text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+<body class="min-h-screen flex flex-col justify-between pb-16 md:pb-0 selection:bg-ark-accent selection:text-white">
+
+    <header class="border-b border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-ark-darkPanel/95 backdrop-blur sticky top-0 z-40 px-3 py-2 sm:px-6 shadow-sm transition-colors duration-300">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div class="flex items-center gap-2.5">
+                <div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg border border-orange-200 dark:border-orange-800/50">
+                    <svg class="w-5 h-5 text-ark-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
                 </div>
                 <div>
-                    <h1 class="text-sm font-extrabold tracking-wide text-stone-900 uppercase">
-                        ARK <span class="text-ark-accent font-mono tracking-tighter">Breeder</span>
+                    <h1 class="text-sm font-black tracking-wider text-stone-900 dark:text-white uppercase flex items-center gap-1.5">
+                        ARK <span class="text-ark-accent tech-font">Breeder</span>
                     </h1>
-                    <p class="text-[10px] font-medium text-stone-500 uppercase tracking-widest">Smart Management</p>
+                    <p class="text-[9px] text-stone-500 dark:text-stone-400 uppercase tracking-tight font-bold">Smart Management</p>
                 </div>
             </div>
 
-            <!-- Desktop Nav -->
-            <nav class="hidden md:flex bg-stone-100/50 p-1 rounded-lg border border-stone-200">
-                <button onclick="switchTab('tab-breeding')" id="btn-tab-breeding" class="nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all bg-white text-ark-accent shadow-sm ring-1 ring-stone-200">🧬 Zuchtlinien</button>
-                <button onclick="switchTab('tab-bestand')" id="btn-tab-bestand" class="nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all text-stone-500 hover:text-stone-900">🦖 Bestand</button>
-                <button onclick="switchTab('tab-settings')" id="btn-tab-settings" class="nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all text-stone-500 hover:text-stone-900">⚙️ System</button>
-            </nav>
+            <!-- DESKTOP NAV -->
+            <div class="hidden md:flex bg-stone-100 dark:bg-stone-900 p-1 rounded-lg border border-stone-200 dark:border-stone-800 transition-colors duration-300">
+                <button onclick="switchTab('tab-breeding')" id="btn-tab-breeding" class="px-4 py-1 rounded-md text-xs font-bold transition-all duration-200 bg-ark-accent text-white shadow">
+                    🧬 Zuchtlinien
+                </button>
+                <button onclick="switchTab('tab-bestand')" id="btn-tab-bestand" class="px-4 py-1 rounded-md text-xs font-bold transition-all duration-200 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white">
+                    🦖 Bestand
+                </button>
+                <button onclick="switchTab('tab-settings')" id="btn-tab-settings" class="px-4 py-1 rounded-md text-xs font-bold transition-all duration-200 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white">
+                    ⚙️ Einstellungen
+                </button>
+            </div>
         </div>
     </header>
 
-    <main class="flex-grow w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 space-y-6">
+    <div id="toast-container" class="fixed bottom-20 md:bottom-5 right-4 left-4 md:left-auto z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-2 py-3 sm:px-4 lg:px-8 space-y-4">
         
         <!-- ==================== TAB: ZUCHTLINIEN ==================== -->
-        <div id="tab-breeding" class="space-y-6 animate-fade-in">
-            <div id="lines-container" class="space-y-8">
-                <!-- DYNAMICALLY RENDERED LINES GO HERE -->
-            </div>
+        <div id="tab-breeding" class="space-y-6">
+            <div id="lines-container" class="space-y-8"></div>
         </div>
 
         <!-- ==================== TAB: BESTAND ==================== -->
-        <div id="tab-bestand" class="hidden space-y-6 animate-fade-in">
-            <div class="bg-white p-4 rounded-2xl border border-ark-border shadow-soft flex justify-between items-center">
+        <div id="tab-bestand" class="hidden space-y-3">
+            <div class="flex justify-between items-center bg-white dark:bg-ark-darkPanel p-3.5 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm transition-colors duration-300">
                 <div>
-                    <h2 class="text-sm font-extrabold text-stone-800 uppercase tracking-wide">Archivierter Bestand</h2>
-                    <p class="text-xs text-stone-500 mt-0.5">Gesicherte Spitzenwerte und fertige Zuchttiere.</p>
+                    <h2 class="text-xs font-black text-stone-900 dark:text-white uppercase tracking-wider">Archivierter Bestand</h2>
+                    <p class="text-[10px] text-stone-500 dark:text-stone-400 font-medium">Gesicherte Meilensteine und fertige Brutpaare.</p>
                 </div>
-                <button onclick="clearBestandPrompt()" class="bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 px-3 py-2 rounded-xl text-xs font-bold transition">
-                    Leeren
+                <button onclick="clearBestandPrompt()" class="text-[10px] bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-lg transition font-bold">
+                    Bestand leeren
                 </button>
             </div>
 
-            <div id="bestand-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+            <div id="bestand-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
 
-            <div id="bestand-placeholder" class="hidden p-12 text-center bg-white rounded-2xl border border-stone-200 shadow-sm">
-                <div class="text-4xl mb-3">🦕</div>
-                <h3 class="text-sm font-bold text-stone-700">Das Archiv ist leer</h3>
-                <p class="text-xs text-stone-500 mt-1 max-w-xs mx-auto">Sichere Top-Werte aus deinen Zuchtprojekten, um sie später wiederzuverwenden.</p>
+            <div id="bestand-placeholder" class="hidden p-10 text-center text-stone-400 dark:text-stone-600 bg-white dark:bg-ark-darkPanel rounded-xl border border-stone-200 dark:border-stone-800 transition-colors duration-300">
+                <p class="font-bold text-xs">Bestandsarchiv ist leer.</p>
+                <p class="text-[9px] mt-0.5">Sichere fertige Zuchtlinien über den Button der jeweiligen Linie ab.</p>
             </div>
         </div>
 
-        <!-- ==================== TAB: SETTINGS ==================== -->
-        <div id="tab-settings" class="hidden animate-fade-in max-w-2xl mx-auto w-full">
-            <div class="bg-white rounded-2xl border border-ark-border shadow-soft overflow-hidden">
-                <div class="p-5 border-b border-stone-100 bg-stone-50/50">
-                    <h2 class="text-sm font-extrabold text-stone-800 uppercase tracking-wide">System & Daten</h2>
-                    <p class="text-xs text-stone-500 mt-1">Verwalte deine Speicherstände und KI-Einstellungen.</p>
+        <!-- ==================== TAB: EINSTELLUNGEN ==================== -->
+        <div id="tab-settings" class="hidden max-w-xl mx-auto space-y-4">
+            <div class="bg-white dark:bg-ark-darkPanel p-4 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm space-y-5 transition-colors duration-300">
+                <div>
+                    <h2 class="text-xs font-black text-stone-900 dark:text-white uppercase tracking-wider border-b border-stone-100 dark:border-stone-800 pb-2">Verwaltung & Optionen</h2>
+                    <p class="text-[10px] text-stone-500 dark:text-stone-400 mt-1 font-medium">Passe die App an deine Bedürfnisse an.</p>
                 </div>
-                
-                <div class="p-5 space-y-6">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="p-4 bg-stone-50 rounded-xl border border-stone-200 hover:border-stone-300 transition">
-                            <h3 class="text-xs font-bold text-stone-800 flex items-center gap-1.5 mb-1">
-                                <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Backup sichern
-                            </h3>
-                            <p class="text-[10px] text-stone-500 mb-3 leading-relaxed">Lädt alle Projekte und Bestände als JSON-Datei herunter.</p>
-                            <button onclick="exportBackup()" class="w-full bg-white border border-stone-300 hover:bg-stone-50 text-stone-700 text-xs py-2 rounded-lg font-bold shadow-sm transition">Download JSON</button>
+
+                <!-- Toggles -->
+                <div class="grid grid-cols-1 gap-3">
+                    <div class="p-3 bg-stone-50 dark:bg-stone-900/50 rounded-lg border border-stone-200 dark:border-stone-800 flex justify-between items-center transition-colors duration-300">
+                        <div>
+                            <h3 class="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">🌙 Dark Mode</h3>
+                            <p class="text-[9px] text-stone-500 dark:text-stone-400 font-medium">Dunkles Design aktivieren</p>
                         </div>
-                        <div class="p-4 bg-stone-50 rounded-xl border border-stone-200 hover:border-stone-300 transition">
-                            <h3 class="text-xs font-bold text-stone-800 flex items-center gap-1.5 mb-1">
-                                <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                Backup laden
-                            </h3>
-                            <p class="text-[10px] text-stone-500 mb-3 leading-relaxed">Überschreibt die aktuellen Daten mit einer JSON-Sicherung.</p>
-                            <label class="block w-full bg-stone-800 hover:bg-stone-700 text-white text-center text-xs py-2 rounded-lg font-bold shadow-sm transition cursor-pointer">
-                                <span>Datei auswählen</span>
-                                <input type="file" accept=".json,application/json,text/plain" class="hidden" onchange="importBackup(event)">
-                            </label>
-                        </div>
+                        <input type="checkbox" id="toggle-darkmode" onchange="toggleDarkMode(this.checked)" class="w-4 h-4 accent-ark-accent cursor-pointer">
                     </div>
 
-                    <div class="p-4 bg-orange-50/50 rounded-xl border border-orange-100">
-                        <h3 class="text-xs font-bold text-orange-900 flex items-center gap-1.5 mb-1">✨ Gemini KI-Integration</h3>
-                        <p class="text-[10px] text-orange-700/80 mb-3 leading-relaxed">Für automatische Screenshot-Auswertung wird ein Google Gemini API-Key benötigt (kostenlos).</p>
-                        <input type="password" id="gemini-api-key-input" placeholder="AIzaSy..." class="w-full bg-white border border-orange-200 rounded-lg px-3 py-2 text-stone-900 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition shadow-sm" onchange="saveGeminiApiKey(this.value)">
+                    <div class="p-3 bg-stone-50 dark:bg-stone-900/50 rounded-lg border border-stone-200 dark:border-stone-800 flex justify-between items-center transition-colors duration-300">
+                        <div>
+                            <h3 class="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">⚧️ Geschlecht ignorieren</h3>
+                            <p class="text-[9px] text-stone-500 dark:text-stone-400 font-medium max-w-[200px] leading-tight">Zeigt bei den Optionen auch Paarungen mit gleichem Geschlecht an.</p>
+                        </div>
+                        <input type="checkbox" id="toggle-ignore-gender" onchange="toggleIgnoreGender(this.checked)" class="w-4 h-4 accent-ark-accent cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Backup & API -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 bg-stone-50 dark:bg-stone-900/50 rounded-lg border border-stone-200 dark:border-stone-800 flex flex-col justify-between col-span-2 sm:col-span-1 transition-colors duration-300">
+                        <div>
+                            <h3 class="text-xs font-bold text-stone-800 dark:text-stone-200">📥 Exportieren</h3>
+                            <p class="text-[9px] text-stone-500 dark:text-stone-400 mb-2 font-medium">Sichere den Stand als JSON.</p>
+                        </div>
+                        <button onclick="exportBackup()" class="w-full bg-stone-800 dark:bg-stone-700 hover:bg-stone-700 dark:hover:bg-stone-600 text-white text-[10px] py-1.5 rounded-md font-bold transition active:scale-95 shadow-sm">
+                            Download JSON
+                        </button>
                     </div>
 
-                    <div class="pt-4 border-t border-stone-100">
-                        <button onclick="confirmResetAllPrompt()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            Alle Daten unwiderruflich löschen
+                    <div class="p-3 bg-stone-50 dark:bg-stone-900/50 rounded-lg border border-stone-200 dark:border-stone-800 flex flex-col justify-between col-span-2 sm:col-span-1 transition-colors duration-300">
+                        <div>
+                            <h3 class="text-xs font-bold text-stone-800 dark:text-stone-200">📤 Importieren</h3>
+                            <p class="text-[9px] text-stone-500 dark:text-stone-400 mb-2 font-medium">Lade ein JSON-Backup.</p>
+                        </div>
+                        <label class="block w-full bg-stone-800 dark:bg-stone-700 hover:bg-stone-700 dark:hover:bg-stone-600 text-white text-center text-[10px] py-1.5 rounded-md font-bold cursor-pointer transition active:scale-95 shadow-sm">
+                            <span>JSON einlesen</span>
+                            <input type="file" id="json-backup-input" accept=".json" class="hidden" onchange="importBackup(event)">
+                        </label>
+                    </div>
+
+                    <div class="p-3 bg-orange-50/50 dark:bg-orange-900/20 rounded-lg border border-orange-100 dark:border-orange-900/50 flex flex-col justify-between col-span-2 transition-colors duration-300">
+                        <div>
+                            <h3 class="text-xs font-bold text-orange-900 dark:text-orange-400">🔑 Gemini API-Key</h3>
+                            <p class="text-[9px] text-orange-800/80 dark:text-orange-300/80 mb-2 font-medium">Hinterlege deinen Key für den Foto-Scan.</p>
+                        </div>
+                        <input type="password" id="gemini-api-key-input" placeholder="AIzaSy..." class="w-full bg-white dark:bg-stone-950 border border-orange-200 dark:border-orange-800/50 rounded px-2.5 py-1.5 text-stone-900 dark:text-white text-xs font-mono focus:outline-none focus:border-ark-accent transition shadow-sm" onchange="saveGeminiApiKey(this.value)">
+                    </div>
+                </div>
+
+                <div class="border-t border-stone-200 dark:border-stone-800 pt-4 transition-colors duration-300">
+                    <div class="flex justify-between items-center bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 p-3 rounded-lg transition-colors duration-300">
+                        <div>
+                            <p class="text-xs font-bold text-red-800 dark:text-red-400">Alles löschen</p>
+                            <p class="text-[9px] text-red-600 dark:text-red-500 font-medium">Löscht dauerhaft alle Linien und Bestände!</p>
+                        </div>
+                        <button onclick="confirmResetAllPrompt()" class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-md transition active:scale-95 shadow-sm">
+                            Hard-Reset
                         </button>
                     </div>
                 </div>
@@ -182,101 +209,128 @@
         </div>
     </main>
 
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-stone-200 z-40 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-        <div class="flex justify-around items-center p-2">
-            <button onclick="switchTab('tab-breeding')" id="nav-mobile-tab-breeding" class="nav-btn-mobile flex flex-col items-center p-2 text-ark-accent w-1/3">
-                <span class="text-xl mb-0.5">🧬</span>
-                <span class="text-[9px] font-bold tracking-wide">Zucht</span>
-            </button>
-            <button onclick="switchTab('tab-bestand')" id="nav-mobile-tab-bestand" class="nav-btn-mobile flex flex-col items-center p-2 text-stone-400 w-1/3">
-                <span class="text-xl mb-0.5">🦖</span>
-                <span class="text-[9px] font-bold tracking-wide">Bestand</span>
-            </button>
-            <button onclick="switchTab('tab-settings')" id="nav-mobile-tab-settings" class="nav-btn-mobile flex flex-col items-center p-2 text-stone-400 w-1/3">
-                <span class="text-xl mb-0.5">⚙️</span>
-                <span class="text-[9px] font-bold tracking-wide">System</span>
-            </button>
-        </div>
+    <!-- FOOTER -->
+    <footer class="hidden md:block border-t border-stone-200 dark:border-stone-800 bg-white dark:bg-ark-darkPanel py-3 text-center text-[10px] text-stone-400 dark:text-stone-500 mt-6 font-medium transition-colors duration-300">
+        <p>© 2026 ARK Breeding Hub • Smart AI Edition</p>
+    </footer>
+
+    <!-- MOBILE NAV -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-ark-darkPanel border-t border-stone-200 dark:border-stone-800 z-50 flex justify-around items-center py-1.5 px-1 shadow-[0_-2px_10px_rgba(0,0,0,0.04)] transition-colors duration-300">
+        <button onclick="switchTab('tab-breeding')" id="mobile-nav-breeding" class="flex flex-col items-center text-ark-accent py-0.5 w-1/3 transition">
+            <span class="text-base">🧬</span>
+            <span class="text-[9px] font-bold tracking-tight">Zuchtlinien</span>
+        </button>
+        <button onclick="switchTab('tab-bestand')" id="mobile-nav-bestand" class="flex flex-col items-center text-stone-400 dark:text-stone-500 py-0.5 w-1/3 transition">
+            <span class="text-base">🦖</span>
+            <span class="text-[9px] font-bold tracking-tight">Bestand</span>
+        </button>
+        <button onclick="switchTab('tab-settings')" id="mobile-nav-settings" class="flex flex-col items-center text-stone-400 dark:text-stone-500 py-0.5 w-1/3 transition">
+            <span class="text-base">⚙️</span>
+            <span class="text-[9px] font-bold tracking-tight">Einstellungen</span>
+        </button>
     </nav>
 
-    <!-- TOASTS -->
-    <div id="toast-container" class="fixed top-16 md:top-auto md:bottom-6 right-4 left-4 md:left-auto z-[100] flex flex-col gap-2 pointer-events-none items-end"></div>
+    <!-- OVERLAY BG -->
+    <div id="overlay-bg" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm hidden z-[90]"></div>
 
-    <!-- DIALOG OVERLAYS -->
-    <div id="overlay-bg" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 hidden transition-opacity duration-200 opacity-0"></div>
-
-    <!-- Confirm Modal -->
-    <div id="modal-confirm" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4 pointer-events-none">
-        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5 pointer-events-auto transform transition-all duration-200 scale-95 opacity-0 border border-stone-100">
-            <h3 id="confirm-title" class="text-sm font-extrabold text-stone-900 uppercase tracking-wide mb-2"></h3>
-            <p id="confirm-message" class="text-xs text-stone-600 leading-relaxed mb-5"></p>
-            <div class="flex gap-2 justify-end">
-                <button id="btn-confirm-cancel" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition">Abbrechen</button>
-                <button id="btn-confirm-ok" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition shadow-sm">Bestätigen</button>
+    <!-- CUSTOM CONFIRM DIALOG MODAL -->
+    <div id="modal-confirm" class="fixed inset-0 hidden flex items-center justify-center p-4 z-[100]">
+        <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl p-4 max-w-xs w-full shadow-2xl space-y-3 transform transition-all">
+            <h4 id="confirm-title" class="text-xs font-black text-stone-900 dark:text-white uppercase tracking-wider">Bestätigen</h4>
+            <p id="confirm-message" class="text-[11px] text-stone-600 dark:text-stone-300 leading-relaxed font-medium"></p>
+            <div class="flex justify-end gap-1.5 text-[10px] font-bold pt-1">
+                <button id="btn-confirm-cancel" class="px-3 py-1.5 border border-stone-200 dark:border-stone-700 rounded text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition">Abbrechen</button>
+                <button id="btn-confirm-ok" class="px-3 py-1.5 bg-red-600 text-white rounded hover:bg-red-500 transition shadow-sm">Ausführen</button>
             </div>
         </div>
     </div>
 
-    <!-- Prompt Modal -->
-    <div id="modal-prompt" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4 pointer-events-none">
-        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5 pointer-events-auto transform transition-all duration-200 scale-95 opacity-0 border border-stone-100">
-            <h3 id="prompt-title" class="text-sm font-extrabold text-stone-900 uppercase tracking-wide mb-2"></h3>
-            <p id="prompt-message" class="text-xs text-stone-600 leading-relaxed mb-4"></p>
-            <input type="text" id="prompt-input" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-ark-accent focus:bg-white transition mb-5">
-            <div class="flex gap-2 justify-end">
-                <button id="btn-prompt-cancel" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition">Abbrechen</button>
-                <button id="btn-prompt-ok" class="px-4 py-2 bg-ark-accent hover:bg-orange-700 text-white text-xs font-bold rounded-xl transition shadow-sm">Speichern</button>
+    <!-- CUSTOM PROMPT DIALOG MODAL -->
+    <div id="modal-prompt" class="fixed inset-0 hidden flex items-center justify-center p-4 z-[100]">
+        <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl p-4 max-w-xs w-full shadow-2xl space-y-3 transform transition-all">
+            <h4 id="prompt-title" class="text-xs font-black text-stone-900 dark:text-white uppercase tracking-wider">Eingabe erforderlich</h4>
+            <p id="prompt-message" class="text-[11px] text-stone-600 dark:text-stone-300 font-medium"></p>
+            <input type="text" id="prompt-input" class="w-full bg-stone-50 dark:bg-stone-950 border border-stone-300 dark:border-stone-700 rounded px-2.5 py-1.5 text-stone-900 dark:text-white text-xs font-bold focus:outline-none focus:border-ark-accent transition">
+            <div class="flex justify-end gap-1.5 text-[10px] font-bold pt-1">
+                <button id="btn-prompt-cancel" class="px-3 py-1.5 border border-stone-200 dark:border-stone-700 rounded text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition">Abbrechen</button>
+                <button id="btn-prompt-ok" class="px-3 py-1.5 bg-ark-accent text-white rounded hover:bg-orange-700 transition shadow-sm">Speichern</button>
             </div>
         </div>
     </div>
 
-    <!-- Add Line Modal -->
-    <div id="modal-add-line" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4 pointer-events-none">
-        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5 pointer-events-auto transform transition-all duration-200 scale-95 opacity-0 border border-stone-100">
-            <h3 class="text-sm font-extrabold text-stone-900 uppercase tracking-wide mb-4">Neues Projekt</h3>
-            <label class="block text-[10px] font-bold text-stone-500 uppercase mb-1.5 ml-1">Name der Zuchtlinie</label>
-            <input type="text" id="input-line-name" placeholder="z.B. Boss Rex Melee" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900 focus:bg-white transition mb-5">
-            <div class="flex gap-2 justify-end">
-                <button onclick="closeModal('modal-add-line')" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition">Abbrechen</button>
-                <button onclick="createNewLine()" class="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl transition shadow-sm">Erstellen</button>
+    <!-- MODAL: ADD LINE -->
+    <div id="modal-add-line" class="fixed inset-0 hidden flex items-center justify-center p-4 z-[100]">
+        <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl p-4 max-w-xs w-full shadow-2xl space-y-3 transform transition-all">
+            <h3 class="text-xs font-black text-stone-950 dark:text-white uppercase tracking-wider border-b border-stone-100 dark:border-stone-800 pb-1.5">Neues Projekt</h3>
+            <div>
+                <label class="block text-[9px] uppercase font-bold text-stone-500 dark:text-stone-400 mb-1">Name der Zuchtlinie</label>
+                <input type="text" id="input-line-name" placeholder="z.B. Megaloceros Melee" class="w-full bg-stone-50 dark:bg-stone-950 border border-stone-300 dark:border-stone-700 rounded px-2.5 py-1.5 text-stone-900 dark:text-white text-xs font-bold focus:outline-none focus:border-ark-accent transition">
+            </div>
+            <div class="flex justify-end gap-1.5 text-[10px] font-bold pt-1">
+                <button onclick="closeModal('modal-add-line')" class="px-3 py-1.5 border border-stone-200 dark:border-stone-700 rounded text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition">Abbrechen</button>
+                <button onclick="createNewLine()" class="px-3 py-1.5 bg-ark-accent text-white rounded hover:bg-orange-700 transition shadow-sm">Erstellen</button>
             </div>
         </div>
     </div>
 
-    <!-- Copy to Line Modal -->
-    <div id="modal-copy-bestand" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4 pointer-events-none">
-        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5 pointer-events-auto transform transition-all duration-200 scale-95 opacity-0 border border-stone-100">
-            <h3 class="text-sm font-extrabold text-stone-900 uppercase tracking-wide mb-2">In Projekt kopieren</h3>
-            <p class="text-xs text-stone-600 leading-relaxed mb-4">Wähle die Zuchtlinie, um diesen Stamm als Elternteil hinzuzufügen.</p>
+    <!-- MODAL: COPY BESTAND TO LINE -->
+    <div id="modal-copy-bestand" class="fixed inset-0 hidden flex items-center justify-center p-4 z-[100]">
+        <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl p-4 max-w-xs w-full shadow-2xl space-y-3 transform transition-all">
+            <h4 class="text-xs font-black text-stone-900 dark:text-white uppercase tracking-wider border-b border-stone-100 dark:border-stone-800 pb-1.5">Bestand in Linie kopieren</h4>
+            <p class="text-[10px] text-stone-600 dark:text-stone-300 leading-relaxed font-medium">Wähle aus, in welche Zuchtlinie du diesen Bestand-Dino als neuen Zuchtkandidaten importieren möchtest:</p>
             <input type="hidden" id="copy-bestand-id">
-            <select id="select-copy-target-line" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-ark-accent focus:bg-white transition mb-5 appearance-none cursor-pointer"></select>
-            <div class="flex gap-2 justify-end">
-                <button onclick="closeModal('modal-copy-bestand')" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition">Abbrechen</button>
-                <button onclick="executeCopyBestandToLine()" class="px-4 py-2 bg-ark-accent hover:bg-orange-700 text-white text-xs font-bold rounded-xl transition shadow-sm">Einfügen</button>
+            
+            <div>
+                <label class="block text-[9px] uppercase font-bold text-stone-500 dark:text-stone-400 mb-1">Zuchtlinie auswählen</label>
+                <select id="select-copy-target-line" class="w-full bg-stone-50 dark:bg-stone-950 border border-stone-300 dark:border-stone-700 rounded px-2.5 py-1.5 text-stone-900 dark:text-white text-xs font-bold focus:outline-none focus:border-ark-accent transition"></select>
+            </div>
+
+            <div class="flex justify-end gap-1.5 text-[10px] font-bold pt-1">
+                <button onclick="closeModal('modal-copy-bestand')" class="px-3 py-1.5 border border-stone-200 dark:border-stone-700 rounded text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition">Abbrechen</button>
+                <button onclick="executeCopyBestandToLine()" class="px-3 py-1.5 bg-ark-accent text-white rounded hover:bg-orange-700 transition shadow-sm">Kopieren</button>
             </div>
         </div>
     </div>
 
-    <!-- AI Scan Loading Overlay -->
-    <div id="scan-loading-overlay" class="fixed inset-0 bg-stone-950/90 backdrop-blur-sm z-[200] hidden flex-col items-center justify-center p-6 text-white transition-opacity duration-300 opacity-0">
-        <div class="relative w-24 h-24 mb-6">
-            <svg class="absolute inset-0 w-full h-full text-stone-800 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-            <div class="absolute inset-0 flex items-center justify-center text-3xl animate-pulse">📸</div>
+    <!-- SCANNING FULLSCREEN OVERLAY -->
+    <div id="scan-loading-overlay" class="fixed inset-0 bg-stone-950/90 backdrop-blur-md hidden flex flex-col items-center justify-center p-6 z-[200]">
+        <div class="relative w-24 h-24 mb-6 flex items-center justify-center">
+            <div class="absolute inset-0 border-4 border-orange-500/10 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-transparent border-t-ark-accent rounded-full animate-spin"></div>
+            <span class="text-2xl animate-bounce">📸</span>
         </div>
-        <h3 class="font-bold tracking-widest uppercase text-sm mb-2 font-mono text-orange-400">Analysiere Bilddaten</h3>
-        <p class="text-xs text-stone-400 max-w-[250px] text-center leading-relaxed">Gemini extrahiert die Statuswerte. Dies dauert einen kurzen Moment...</p>
-        <img id="scan-loading-preview-img" class="mt-8 w-24 h-24 object-cover rounded-xl border-2 border-stone-800 opacity-50 shadow-2xl" src="">
+        <h3 class="text-white font-bold tracking-wider uppercase text-sm tech-font">Lese Dino-Daten ein...</h3>
+        <p class="text-xs text-orange-200/70 mt-1 max-w-xs text-center font-medium">Gemini analysiert deinen Screenshot. Das dauert einen Moment...</p>
+        <div class="mt-8 max-w-xs bg-white/5 border border-white/10 p-3 rounded-lg text-center">
+            <img id="scan-loading-preview-img" class="mx-auto w-16 h-16 object-cover rounded opacity-40 border border-white/10 mb-2" src="">
+        </div>
     </div>
 
     <script>
-        const STAT_KEYS = ['hp', 'stamina', 'oxygen', 'food', 'weight', 'melee'];
-        const STAT_LABELS = { hp: 'HP', stamina: 'Ausdauer', oxygen: 'Sauerstoff', food: 'Nahrung', weight: 'Gewicht', melee: 'Melee' };
-        
-        let appState = { lines: [], bestand: [] };
+        let appState = {
+            lines: [],
+            bestand: [],
+            settings: {
+                darkMode: false,
+                ignoreGender: false
+            }
+        };
 
-        window.onload = () => {
-            loadState();
-            if (appState.lines.length === 0 && appState.bestand.length === 0) initDefaultData();
+        const STAT_KEYS = ['hp', 'stamina', 'oxygen', 'food', 'weight', 'melee', 'level'];
+        const BREEDING_STATS = ['hp', 'stamina', 'oxygen', 'food', 'weight', 'melee'];
+        
+        const STAT_EMOJIS = {
+            hp: '🩸',
+            stamina: '⚡',
+            oxygen: '💨',
+            food: '🍖',
+            weight: '⚖️',
+            melee: '💪',
+            level: '⬆️'
+        };
+
+        window.onload = function() {
+            loadFromLocalStorage();
             
             const savedKey = localStorage.getItem('ark_gemini_api_key');
             if (savedKey) document.getElementById('gemini-api-key-input').value = savedKey.trim();
@@ -285,89 +339,50 @@
             renderBestand();
         };
 
-        function loadState() {
-            try {
-                const data = localStorage.getItem('ark_hub_v4');
-                if (data) {
-                    appState = JSON.parse(data);
-                }
-                if (!appState.lines) appState.lines = [];
-                if (!appState.bestand) appState.bestand = [];
-            } catch (e) { console.error("Load error", e); }
-        }
-
-        function saveState() {
-            localStorage.setItem('ark_hub_v4', JSON.stringify(appState));
-        }
-
-        function initDefaultData() {
-            appState = { lines: [], bestand: [] };
-            saveState();
-        }
-
-        function showToast(msg, type = 'success') {
+        function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const colors = type === 'success' ? 'bg-stone-900 text-white' : 'bg-red-600 text-white';
-            const icon = type === 'success' ? '✓' : '⚠';
-            
-            toast.className = `${colors} px-4 py-3 rounded-xl shadow-xl text-xs font-bold flex items-center gap-3 transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-auto`;
-            toast.innerHTML = `<span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px]">${icon}</span> <span class="break-words max-w-[250px]">${msg}</span>`;
-            
+            toast.className = `p-2.5 rounded-lg border text-[11px] font-bold shadow-xl transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-auto flex items-center justify-between gap-3 min-w-[200px] ${
+                type === 'success' ? 'bg-emerald-50 dark:bg-emerald-900 border-emerald-200 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300' :
+                type === 'error' ? 'bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-700 text-red-800 dark:text-red-300' :
+                'bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300'
+            }`;
+            toast.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" class="text-stone-400 hover:text-stone-800 dark:hover:text-white">&times;</button>`;
             container.appendChild(toast);
-            requestAnimationFrame(() => {
-                toast.classList.remove('translate-y-4', 'opacity-0');
-            });
-
+            
+            setTimeout(() => toast.classList.remove('translate-y-4', 'opacity-0'), 10);
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'scale-95');
                 setTimeout(() => toast.remove(), 300);
-            }, 6500);
+            }, 3500);
         }
 
         function openModal(id) {
-            const overlay = document.getElementById('overlay-bg');
-            const modal = document.getElementById(id);
-            if (!overlay || !modal) return;
-            const content = modal.firstElementChild;
-            
-            overlay.classList.remove('hidden');
-            modal.classList.remove('hidden');
-            
-            requestAnimationFrame(() => {
-                overlay.classList.remove('opacity-0');
-                if (content) content.classList.remove('opacity-0', 'scale-95');
-            });
+            document.getElementById('overlay-bg').classList.remove('hidden');
+            document.getElementById(id).classList.remove('hidden');
         }
 
         function closeModal(id) {
-            const overlay = document.getElementById('overlay-bg');
-            const modal = document.getElementById(id);
-            if (!overlay || !modal) return;
-            const content = modal.firstElementChild;
-            
-            overlay.classList.add('opacity-0');
-            if (content) content.classList.add('opacity-0', 'scale-95');
-            
-            setTimeout(() => {
-                overlay.classList.add('hidden');
-                modal.classList.add('hidden');
-            }, 200);
+            document.getElementById('overlay-bg').classList.add('hidden');
+            document.getElementById(id).classList.add('hidden');
         }
 
         function customConfirm(title, message, callback) {
             document.getElementById('confirm-title').textContent = title;
             document.getElementById('confirm-message').textContent = message;
+            openModal('modal-confirm');
             
             const btnOk = document.getElementById('btn-confirm-ok');
             const btnCancel = document.getElementById('btn-confirm-cancel');
             
-            const cleanup = () => { closeModal('modal-confirm'); };
+            const cleanup = () => {
+                closeModal('modal-confirm');
+                btnOk.replaceWith(btnOk.cloneNode(true));
+                btnCancel.replaceWith(btnCancel.cloneNode(true));
+            };
             
-            btnOk.onclick = () => { cleanup(); callback(true); };
-            btnCancel.onclick = () => { cleanup(); callback(false); };
-            
-            openModal('modal-confirm');
+            document.getElementById('btn-confirm-ok').addEventListener('click', () => { cleanup(); callback(true); });
+            document.getElementById('btn-confirm-cancel').addEventListener('click', () => { cleanup(); callback(false); });
         }
 
         function customPrompt(title, message, defaultValue, callback) {
@@ -375,189 +390,264 @@
             document.getElementById('prompt-message').textContent = message;
             const input = document.getElementById('prompt-input');
             input.value = defaultValue;
+            openModal('modal-prompt');
+            setTimeout(() => input.focus(), 100);
             
             const btnOk = document.getElementById('btn-prompt-ok');
             const btnCancel = document.getElementById('btn-prompt-cancel');
             
-            const cleanup = () => { closeModal('modal-prompt'); };
-            
-            btnOk.onclick = () => { cleanup(); callback(input.value); };
-            btnCancel.onclick = () => { callback(null); cleanup(); };
-            
-            openModal('modal-prompt');
-            setTimeout(() => input.focus(), 100);
-        }
-
-        function switchTab(tabId) {
-            ['tab-breeding', 'tab-bestand', 'tab-settings'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            document.getElementById(tabId).classList.remove('hidden');
-
-            document.querySelectorAll('.nav-btn-desktop').forEach(btn => {
-                if (btn.id === `btn-${tabId}`) {
-                    btn.className = "nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all bg-white text-ark-accent shadow-sm ring-1 ring-stone-200";
-                } else {
-                    btn.className = "nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all text-stone-500 hover:text-stone-900";
-                }
-            });
-
-            document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
-                if (btn.id === `nav-mobile-${tabId}`) {
-                    btn.className = "nav-btn-mobile flex flex-col items-center p-2 text-ark-accent w-1/3";
-                    btn.querySelector('span:last-child').classList.add('text-ark-accent');
-                } else {
-                    btn.className = "nav-btn-mobile flex flex-col items-center p-2 text-stone-400 w-1/3 hover:text-stone-600 transition";
-                    btn.querySelector('span:last-child').classList.remove('text-ark-accent');
-                }
-            });
-        }
-
-        function createNewLine() {
-            const inp = document.getElementById('input-line-name');
-            const name = inp.value.trim() || 'Unbenanntes Projekt';
-            appState.lines.unshift({ id: 'line_' + Date.now(), name, dinos: [] });
-            inp.value = '';
-            saveState();
-            closeModal('modal-add-line');
-            renderAllLines();
-            showToast('Projekt erstellt');
-        }
-
-        function deleteLine(id, skipConfirm = false) {
-            const performDelete = () => {
-                appState.lines = appState.lines.filter(l => l.id !== id);
-                saveState();
-                renderAllLines();
-                showToast('Projekt gelöscht');
+            const cleanup = () => {
+                closeModal('modal-prompt');
+                btnOk.replaceWith(btnOk.cloneNode(true));
+                btnCancel.replaceWith(btnCancel.cloneNode(true));
             };
+            
+            document.getElementById('btn-prompt-ok').addEventListener('click', () => {
+                cleanup(); callback(document.getElementById('prompt-input').value);
+            });
+            document.getElementById('btn-prompt-cancel').addEventListener('click', () => {
+                cleanup(); callback(null);
+            });
+        }
 
-            if (skipConfirm) {
-                performDelete();
+        function saveToLocalStorage() {
+            localStorage.setItem('ark_hub_v4', JSON.stringify(appState));
+        }
+
+        function loadFromLocalStorage() {
+            const data = localStorage.getItem('ark_hub_v4');
+            if (data) {
+                try {
+                    appState = JSON.parse(data);
+                } catch(e) { console.error("Parse Error", e); }
+            }
+            if (!appState.lines) appState.lines = [];
+            if (!appState.bestand) appState.bestand = [];
+            if (!appState.settings) appState.settings = { darkMode: false, ignoreGender: false };
+
+            // Apply Settings
+            document.getElementById('toggle-darkmode').checked = appState.settings.darkMode;
+            document.getElementById('toggle-ignore-gender').checked = appState.settings.ignoreGender;
+            if (appState.settings.darkMode) document.documentElement.classList.add('dark');
+        }
+
+        function toggleDarkMode(isDark) {
+            appState.settings.darkMode = isDark;
+            saveToLocalStorage();
+            if (isDark) {
+                document.documentElement.classList.add('dark');
             } else {
-                customConfirm('Projekt löschen', 'Bist du sicher? Alle Dinos in dieser Ansicht gehen verloren.', (ok) => {
-                    if (ok) performDelete();
-                });
+                document.documentElement.classList.remove('dark');
             }
         }
 
-        function addDino(lineId) {
+        function toggleIgnoreGender(isIgnored) {
+            appState.settings.ignoreGender = isIgnored;
+            saveToLocalStorage();
+            renderAllLines();
+        }
+
+        function switchTab(tabId) {
+            ['tab-breeding', 'tab-bestand', 'tab-settings'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            const desktopKeys = { 'tab-breeding': 'btn-tab-breeding', 'tab-bestand': 'btn-tab-bestand', 'tab-settings': 'btn-tab-settings' };
+            Object.keys(desktopKeys).forEach(key => {
+                const btn = document.getElementById(desktopKeys[key]);
+                if (btn) btn.className = key === tabId 
+                    ? "px-4 py-1 rounded-md text-xs font-bold transition-all duration-200 bg-ark-accent text-white shadow" 
+                    : "px-4 py-1 rounded-md text-xs font-bold transition-all duration-200 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white";
+            });
+
+            const mobileKeys = { 'tab-breeding': 'mobile-nav-breeding', 'tab-bestand': 'mobile-nav-bestand', 'tab-settings': 'mobile-nav-settings' };
+            Object.keys(mobileKeys).forEach(key => {
+                const btn = document.getElementById(mobileKeys[key]);
+                if (btn) btn.className = key === tabId 
+                    ? "flex flex-col items-center text-ark-accent py-0.5 w-1/3 transition" 
+                    : "flex flex-col items-center text-stone-400 dark:text-stone-500 py-0.5 w-1/3 transition";
+            });
+
+            if (tabId === 'tab-bestand') renderBestand();
+            if (tabId === 'tab-breeding') renderAllLines();
+        }
+
+        function saveGeminiApiKey(val) {
+            localStorage.setItem('ark_gemini_api_key', val.trim());
+            showToast("Gemini API-Key lokal gesichert!");
+        }
+
+        function createNewLine() {
+            const nameInput = document.getElementById('input-line-name');
+            const name = nameInput.value.trim() || 'Unbenanntes Projekt';
+            appState.lines.push({ id: 'line_' + Date.now(), name: name, dinos: [] });
+            nameInput.value = '';
+            closeModal('modal-add-line');
+            saveToLocalStorage();
+            renderAllLines();
+            showToast(`Linie "${name}" angelegt!`);
+        }
+
+        function deleteSpecificLine(lineId, skipConfirm = false) {
+            const activeLine = appState.lines.find(l => l.id === lineId);
+            if (!activeLine) return;
+            const exec = () => {
+                appState.lines = appState.lines.filter(l => l.id !== lineId);
+                saveToLocalStorage();
+                renderAllLines();
+                showToast("Zuchtlinie gelöscht.");
+            };
+            if (skipConfirm) exec();
+            else customConfirm("Linie löschen", `Möchtest du "${activeLine.name}" wirklich vollständig löschen?`, ok => { if(ok) exec(); });
+        }
+
+        function updateDinoStatInline(lineId, dinoId, statKey, value) {
+            const dino = appState.lines.find(l => l.id === lineId)?.dinos.find(d => d.id === dinoId);
+            if (!dino) return;
+            dino[statKey] = parseInt(value) || 0;
+
+            let sum = 0;
+            BREEDING_STATS.forEach(k => sum += (dino[k] || 0));
+            dino.level = sum + 1;
+
+            const lvlEl = document.getElementById(`level-display-${dinoId}`);
+            if (lvlEl) lvlEl.value = dino.level;
+            saveToLocalStorage();
+        }
+
+        function updateDinoTextInline(lineId, dinoId, field, value) {
+            const dino = appState.lines.find(l => l.id === lineId)?.dinos.find(d => d.id === dinoId);
+            if (!dino) return;
+            dino[field] = value.trim();
+            saveToLocalStorage();
+        }
+
+        function toggleDinoGender(lineId, dinoId) {
+            const dino = appState.lines.find(l => l.id === lineId)?.dinos.find(d => d.id === dinoId);
+            if (!dino) return;
+            dino.gender = dino.gender === 'M' ? 'W' : 'M';
+            saveToLocalStorage();
+            renderAllLines(); 
+            showToast(`Geschlecht auf ${dino.gender === 'M' ? '♂ Männlich' : '♀ Weiblich'} gesetzt.`);
+        }
+
+        function addDinoInline(lineId) {
             const line = appState.lines.find(l => l.id === lineId);
             if (!line) return;
             const newDino = {
                 id: 'dino_' + Date.now() + Math.random().toString(36).substring(2,5),
                 name: `Dino #${line.dinos.length + 1}`,
                 gender: 'M',
-                hp: 0, stamina: 0, oxygen: 0, food: 0, weight: 0, melee: 0,
-                isTrash: false
+                hp: 0, stamina: 0, oxygen: 0, food: 0, weight: 0, melee: 0, level: 1, isTrash: false
             };
             line.dinos.push(newDino);
-            saveState();
+            saveToLocalStorage();
             renderAllLines();
-            
+            showToast("Zuchtkandidat hinzugefügt!");
             setTimeout(() => {
-                const el = document.getElementById(`name_${newDino.id}`);
+                const el = document.getElementById(`name-input-${newDino.id}`);
                 if (el) { el.focus(); el.select(); }
             }, 50);
         }
 
-        function removeDino(lineId, dinoId) {
-            customConfirm('Dino entfernen', 'Möchtest du dieses Tier entfernen?', (ok) => {
-                if(ok) {
-                    const line = appState.lines.find(l => l.id === lineId);
+        function deleteDinoInline(lineId, dinoId) {
+            const line = appState.lines.find(l => l.id === lineId);
+            if (!line) return;
+            customConfirm("Dino löschen", "Tier aus der Liste entfernen?", ok => {
+                if (ok) {
                     line.dinos = line.dinos.filter(d => d.id !== dinoId);
-                    saveState();
+                    saveToLocalStorage();
                     renderAllLines();
                 }
             });
         }
 
-        function toggleGender(lineId, dinoId) {
-            const line = appState.lines.find(l => l.id === lineId);
-            const dino = line.dinos.find(d => d.id === dinoId);
-            dino.gender = dino.gender === 'M' ? 'W' : 'M';
-            saveState();
-            
-            const btn = document.getElementById(`gender_btn_${dinoId}`);
-            if (btn) {
-                btn.innerHTML = dino.gender === 'M' ? '♂' : '♀';
-                btn.className = dino.gender === 'M' 
-                    ? 'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition bg-sky-100 text-sky-700 hover:bg-sky-200'
-                    : 'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition bg-pink-100 text-pink-700 hover:bg-pink-200';
+        function onInlineInputBlur() { renderAllLines(); }
+
+        function triggerImageScan(event, lineId) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const scale = Math.min(1024 / img.width, 1024 / img.height, 1);
+                    canvas.width = img.width * scale; canvas.height = img.height * scale;
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                    document.getElementById('scan-loading-preview-img').src = compressedBase64;
+                    document.getElementById('scan-loading-overlay').classList.remove('hidden');
+
+                    executeGeminiOCR(compressedBase64.split(',')[1], lineId);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            event.target.value = ''; 
+        }
+
+        async function executeGeminiOCR(base64Data, lineId) {
+            const apiKey = localStorage.getItem('ark_gemini_api_key')?.trim() || '';
+            if (!apiKey) {
+                document.getElementById('scan-loading-overlay').classList.add('hidden');
+                return showToast("Bitte hinterlege erst einen API-Key in den Einstellungen.", "error");
             }
-            updateSmartVisuals(lineId);
-        }
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            const prompt = `Extract ARK dinosaur stats from image. Return ONLY pure JSON. Schema: {"name": string, "hp": number, "stamina": number, "oxygen": number, "food": number, "weight": number, "melee": number, "gender": "M" or "W"}. Find wild points if visible, else raw values. Map logically.`;
 
-        function handleNameInput(lineId, dinoId, val) {
-            const dino = appState.lines.find(l => l.id === lineId).dinos.find(d => d.id === dinoId);
-            dino.name = val.trim();
-            saveState();
-            updateSuggestionsDOM(lineId);
-        }
-
-        function handleStatInput(lineId, dinoId, stat, val) {
-            const numVal = parseInt(val) || 0;
-            const line = appState.lines.find(l => l.id === lineId);
-            const dino = line.dinos.find(d => d.id === dinoId);
-            dino[stat] = numVal;
-            saveState();
-
-            let totalStats = 0;
-            STAT_KEYS.forEach(k => totalStats += (dino[k] || 0));
-            const lvlInput = document.getElementById(`lvl_${dinoId}`);
-            if (lvlInput) lvlInput.value = totalStats + 1;
-
-            updateSmartVisuals(lineId);
-        }
-
-        function updateSmartVisuals(lineId) {
-            const line = appState.lines.find(l => l.id === lineId);
-            if (!line) return;
-
-            const maxStats = {};
-            STAT_KEYS.forEach(stat => {
-                maxStats[stat] = line.dinos.length ? Math.max(...line.dinos.map(d => d[stat] || 0)) : 0;
-                const topLabel = document.getElementById(`top_lbl_${lineId}_${stat}`);
-                if (topLabel) topLabel.textContent = maxStats[stat];
-            });
-
-            let sumMax = 0;
-            STAT_KEYS.forEach(s => sumMax += maxStats[s]);
-            const topLvlLabel = document.getElementById(`top_lbl_${lineId}_level`);
-            if (topLvlLabel) topLvlLabel.textContent = line.dinos.length ? (sumMax + 1) : 0;
-
-            line.dinos.forEach(dino => {
-                let hasTop = false;
-                
-                STAT_KEYS.forEach(stat => {
-                    const inputEl = document.getElementById(`stat_${dino.id}_${stat}`);
-                    if (!inputEl) return;
-                    
-                    const isMax = (dino[stat] === maxStats[stat] && maxStats[stat] > 0);
-                    if (isMax) hasTop = true;
-
-                    if (isMax && !dino.isTrash) {
-                        inputEl.className = "w-full text-center bg-orange-100/50 border border-orange-300 text-orange-900 font-extrabold py-1.5 rounded-lg text-xs font-mono transition outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white";
-                    } else {
-                        inputEl.className = "w-full text-center bg-white border border-stone-200 text-stone-600 font-medium py-1.5 rounded-lg text-xs font-mono transition outline-none focus:ring-2 focus:ring-ark-accent focus:border-transparent";
-                    }
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: 'image/jpeg', data: base64Data } }] }],
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
                 });
 
-                dino.isTrash = !hasTop && line.dinos.length > 0;
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
                 
-                const trashInd = document.getElementById(`trash_ind_${dino.id}`);
-                const colGroup = document.querySelectorAll(`.col_grp_${dino.id}`);
-                
-                if (dino.isTrash) {
-                    if (trashInd) trashInd.classList.remove('hidden');
-                    colGroup.forEach(el => el.classList.add('opacity-40', 'bg-red-50/30'));
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    const stats = JSON.parse(data.candidates[0].content.parts[0].text);
+                    applyScannedStats(stats, lineId);
                 } else {
-                    if (trashInd) trashInd.classList.add('hidden');
-                    colGroup.forEach(el => el.classList.remove('opacity-40', 'bg-red-50/30'));
+                    throw new Error("Invalid output format");
                 }
-            });
+            } catch (err) {
+                document.getElementById('scan-loading-overlay').classList.add('hidden');
+                showToast("Scannen fehlgeschlagen. Kontrolliere Key oder Verbindung.", "error");
+            }
+        }
 
-            updateSuggestionsDOM(lineId);
+        function applyScannedStats(stats, lineId) {
+            const line = appState.lines.find(l => l.id === lineId);
+            
+            let finalName = stats.name || '';
+            const genNames = ['gescannter dino', 'scanned dino', 'dino', ''];
+            if (genNames.includes(finalName.toLowerCase())) {
+                finalName = `Dino #${line.dinos.length + 1}`;
+            }
+
+            let sum = 0;
+            BREEDING_STATS.forEach(s => sum += (stats[s] || 0));
+
+            line.dinos.push({
+                id: 'dino_' + Date.now(),
+                name: finalName,
+                gender: stats.gender === 'W' ? 'W' : 'M',
+                hp: stats.hp || 0, stamina: stats.stamina || 0, oxygen: stats.oxygen || 0,
+                food: stats.food || 0, weight: stats.weight || 0, melee: stats.melee || 0,
+                level: sum + 1,
+                isTrash: false
+            });
+            saveToLocalStorage();
+            renderAllLines();
+            document.getElementById('scan-loading-overlay').classList.add('hidden');
+            showToast(`Werte für "${finalName}" importiert!`);
         }
 
         function renderAllLines() {
@@ -566,186 +656,188 @@
 
             if (appState.lines.length === 0) {
                 container.innerHTML = `
-                    <div class="p-10 text-center bg-white rounded-2xl border border-stone-200 shadow-sm max-w-lg mx-auto flex flex-col items-center">
-                        <div class="text-4xl mb-3 text-stone-300">🧬</div>
-                        <h3 class="text-sm font-bold text-stone-700">Keine Zuchtprojekte</h3>
-                        <p class="text-xs text-stone-500 mt-1 mb-4">Erstelle dein erstes Projekt, um Stat-Werte zu tracken.</p>
-                        <button onclick="openModal('modal-add-line')" class="bg-stone-900 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition active:scale-95">+ Neues Projekt</button>
-                    </div>
-                `;
+                    <div class="p-10 text-center bg-white dark:bg-ark-darkPanel rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm max-w-lg mx-auto flex flex-col items-center">
+                        <div class="text-4xl mb-3 opacity-50">🧬</div>
+                        <h3 class="text-sm font-bold text-stone-700 dark:text-stone-300">Keine Zuchtprojekte</h3>
+                        <p class="text-xs text-stone-500 dark:text-stone-400 mt-1 mb-4 font-medium">Erstelle dein erstes Projekt, um Stat-Werte zu tracken.</p>
+                        <button onclick="openModal('modal-add-line')" class="bg-ark-accent hover:bg-orange-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition active:scale-95">+ Neues Projekt</button>
+                    </div>`;
                 return;
             }
 
             appState.lines.forEach(line => {
-                const maxStats = {};
-                let hasAnyData = line.dinos.length > 0;
-                STAT_KEYS.forEach(stat => { maxStats[stat] = hasAnyData ? Math.max(...line.dinos.map(d => d[stat] || 0)) : 0; });
-                let sumMax = 0; STAT_KEYS.forEach(s => sumMax += maxStats[s]);
-                const topLevel = hasAnyData ? (sumMax + 1) : 0;
-
-                line.dinos.forEach(d => {
-                    let hasTop = false;
-                    STAT_KEYS.forEach(s => { if(d[s] === maxStats[s] && maxStats[s] > 0) hasTop = true; });
-                    d.isTrash = !hasTop && hasAnyData;
-                });
+                const lineSection = document.createElement('div');
+                lineSection.className = "bg-white dark:bg-ark-darkPanel rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm overflow-hidden p-3 md:p-4 space-y-4";
                 
-                const activeDinos = line.dinos.filter(d => !d.isTrash);
-                const trashDinos = line.dinos.filter(d => d.isTrash);
-                const cols = [...activeDinos, { isPlus: true }, ...trashDinos];
+                const maxStats = {};
+                BREEDING_STATS.forEach(stat => {
+                    maxStats[stat] = line.dinos.length > 0 ? Math.max(...line.dinos.map(d => d[stat] || 0)) : 0;
+                });
+                let sumOfTops = 0; BREEDING_STATS.forEach(s => sumOfTops += maxStats[s]);
+                maxStats['level'] = line.dinos.length > 0 ? (sumOfTops + 1) : 0;
 
-                let thHtml = '';
-                cols.forEach(col => {
-                    if (col.isPlus) {
-                        thHtml += `
-                            <th class="p-2 border-b border-stone-200 align-bottom w-12 bg-stone-50/50">
-                                <button onclick="addDino('${line.id}')" class="w-8 h-8 mx-auto bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-sm transform active:scale-90 transition">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                                </button>
+                line.dinos.forEach(dino => {
+                    let hasAtLeastOneTop = false;
+                    BREEDING_STATS.forEach(stat => { if (dino[stat] === maxStats[stat] && maxStats[stat] > 0) hasAtLeastOneTop = true; });
+                    dino.isTrash = !hasAtLeastOneTop;
+                });
+
+                const productiveDinos = line.dinos.filter(d => !d.isTrash);
+                const trashDinos = line.dinos.filter(d => d.isTrash);
+                const renderColumns = [...productiveDinos.map(d=>({type:'dino', data:d})), {type:'plus', data:null}, ...trashDinos.map(d=>({type:'dino', data:d}))];
+
+                let thsHTML = '';
+                renderColumns.forEach(col => {
+                    if (col.type === 'plus') {
+                        thsHTML += `
+                            <th class="p-2 border-b border-stone-200 dark:border-stone-800 w-16 text-center align-middle bg-stone-50/50 dark:bg-stone-900/50">
+                                <div class="flex flex-col items-center justify-center">
+                                    <button onclick="addDinoInline('${line.id}')" class="w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-black flex items-center justify-center shadow-sm transition active:scale-90 text-lg leading-none">+</button>
+                                </div>
                             </th>`;
                     } else {
-                        const d = col;
-                        const bgCol = d.isTrash ? 'bg-red-50/30 opacity-40' : 'bg-white';
-                        const gBtnClass = d.gender === 'M' ? 'bg-sky-100 text-sky-700 hover:bg-sky-200' : 'bg-pink-100 text-pink-700 hover:bg-pink-200';
-                        const gIcon = d.gender === 'M' ? '♂' : '♀';
-                        
-                        thHtml += `
-                            <th class="p-2 border-b border-stone-200 min-w-[130px] col_grp_${d.id} ${bgCol} transition-all duration-300">
-                                <div class="flex flex-col gap-2">
-                                    <div class="flex justify-between items-center px-1">
-                                        <button id="gender_btn_${d.id}" onclick="toggleGender('${line.id}', '${d.id}')" class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition ${gBtnClass}">${gIcon}</button>
-                                        <span id="trash_ind_${d.id}" class="text-[9px] font-black tracking-tight text-red-500 bg-red-100 px-1.5 py-0.5 rounded ${d.isTrash ? '' : 'hidden'}">🗑️ ALT</span>
-                                        <button onclick="removeDino('${line.id}', '${d.id}')" class="text-stone-300 hover:text-red-500 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                        const dino = col.data;
+                        const gCol = dino.gender === 'M' ? 'bg-sky-100 dark:bg-sky-900/50 text-sky-800 dark:text-sky-300 border-sky-300 dark:border-sky-700' : 'bg-pink-100 dark:bg-pink-900/50 text-pink-800 dark:text-pink-300 border-pink-300 dark:border-pink-700';
+                        const colBg = dino.isTrash ? 'bg-red-50/30 dark:bg-red-950/20' : 'bg-white dark:bg-transparent';
+                        const trashInd = dino.isTrash ? '<span class="text-red-600 dark:text-red-400 text-[8px] font-black block tracking-tighter mb-1">🗑️ AUSSCHUSS</span>' : '';
+
+                        thsHTML += `
+                            <th class="p-2 text-center border-b border-stone-200 dark:border-stone-800 min-w-[85px] max-w-[110px] relative ${colBg}">
+                                <div class="flex flex-col gap-1 items-center">
+                                    <div class="flex items-center justify-between w-full px-1">
+                                        <button onclick="toggleDinoGender('${line.id}', '${dino.id}')" class="${gCol} text-[11px] font-bold px-2 py-0.5 rounded-full border transition">${dino.gender === 'M' ? '♂' : '♀'}</button>
+                                        ${trashInd}
+                                        <button onclick="deleteDinoInline('${line.id}', '${dino.id}')" class="text-stone-400 hover:text-red-600 dark:hover:text-red-400 font-black text-sm transition px-1">&times;</button>
                                     </div>
-                                    <input type="text" id="name_${d.id}" value="${d.name}" oninput="handleNameInput('${line.id}', '${d.id}', this.value)" placeholder="Name..." class="w-full bg-transparent text-sm font-bold text-center border-b-2 border-transparent focus:border-ark-accent outline-none pb-0.5 transition text-stone-800">
+                                    <input type="text" id="name-input-${dino.id}" value="${dino.name}" 
+                                        oninput="updateDinoTextInline('${line.id}', '${dino.id}', 'name', this.value)" 
+                                        onblur="onInlineInputBlur()" onfocus="this.select()"
+                                        class="w-full bg-transparent text-stone-900 dark:text-white text-[11px] font-bold text-center border-b border-stone-200 dark:border-stone-700 focus:border-ark-accent focus:outline-none py-0.5 placeholder-stone-400">
                                 </div>
                             </th>`;
                     }
                 });
 
-                let rowsHtml = '';
-                [...STAT_KEYS, 'level'].forEach(stat => {
-                    const isLvl = stat === 'level';
-                    const topVal = isLvl ? topLevel : maxStats[stat];
-                    
-                    let tdHtml = '';
-                    cols.forEach(col => {
-                        if (col.isPlus) {
-                            tdHtml += `<td class="p-1 border-b border-stone-100 bg-stone-50/30"><div class="w-px h-4 bg-stone-200 mx-auto"></div></td>`;
+                let rowsHTML = '';
+                STAT_KEYS.forEach(stat => {
+                    let tdsHTML = '';
+                    renderColumns.forEach(col => {
+                        if (col.type === 'plus') {
+                            tdsHTML += `<td class="p-1 border-b border-stone-100 dark:border-stone-800/50 bg-stone-50/20 dark:bg-stone-900/20"><div class="w-px h-3 bg-stone-200 dark:bg-stone-700 mx-auto"></div></td>`;
                         } else {
-                            const d = col;
-                            const bgCol = d.isTrash ? 'bg-red-50/30 opacity-40' : '';
+                            const dino = col.data;
+                            const value = dino[stat] || 0;
+                            const isMax = !dino.isTrash && value === maxStats[stat] && maxStats[stat] > 0;
                             
-                            if (isLvl) {
-                                let t = 0; STAT_KEYS.forEach(k => t+=(d[k]||0));
-                                tdHtml += `<td class="p-1.5 border-b border-stone-100 col_grp_${d.id} ${bgCol}"><input disabled id="lvl_${d.id}" value="${t+1}" class="w-full text-center bg-stone-100 text-stone-500 font-bold py-1.5 rounded-lg text-xs font-mono"></td>`;
+                            const inStyle = isMax ? 'bg-orange-100/70 dark:bg-orange-900/40 border border-orange-300 dark:border-orange-700 text-orange-900 dark:text-orange-300 font-extrabold' : 'bg-transparent border border-transparent text-stone-700 dark:text-stone-300 font-semibold';
+                            const opacity = dino.isTrash ? 'opacity-50' : '';
+
+                            if (stat === 'level') {
+                                tdsHTML += `<td class="p-1 text-center border-b border-stone-100 dark:border-stone-800/50 ${opacity}"><input type="number" id="level-display-${dino.id}" value="${value}" disabled readonly class="w-full max-w-[60px] mx-auto bg-stone-100/70 dark:bg-stone-800/70 rounded text-center text-stone-700 dark:text-stone-400 font-mono text-xs font-bold py-1 pointer-events-none border border-transparent"></td>`;
                             } else {
-                                const isMax = (!d.isTrash && d[stat] === topVal && topVal > 0);
-                                const inputClass = isMax 
-                                    ? "w-full text-center bg-orange-100/50 border border-orange-300 text-orange-900 font-extrabold py-1.5 rounded-lg text-xs font-mono transition outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white"
-                                    : "w-full text-center bg-white border border-stone-200 text-stone-600 font-medium py-1.5 rounded-lg text-xs font-mono transition outline-none focus:ring-2 focus:ring-ark-accent focus:border-transparent";
-                                
-                                tdHtml += `<td class="p-1.5 border-b border-stone-100 col_grp_${d.id} ${bgCol}">
-                                    <input type="number" id="stat_${d.id}_${stat}" value="${d[stat]||0}" oninput="handleStatInput('${line.id}', '${d.id}', '${stat}', this.value)" onfocus="this.select()" class="${inputClass}">
-                                </td>`;
+                                tdsHTML += `<td class="p-1 text-center border-b border-stone-100 dark:border-stone-800/50 ${opacity}"><input type="number" pattern="[0-9]*" value="${value}" oninput="updateDinoStatInline('${line.id}', '${dino.id}', '${stat}', this.value)" onblur="onInlineInputBlur()" onfocus="this.select()" class="w-full max-w-[60px] mx-auto rounded text-center font-mono text-xs py-1 transition focus:bg-stone-50 dark:focus:bg-stone-800 focus:outline-none focus:ring-1 focus:ring-ark-accent ${inStyle}"></td>`;
                             }
                         }
                     });
 
-                    const statLabel = isLvl ? 'Level' : STAT_LABELS[stat];
-                    rowsHtml += `
-                        <tr class="hover:bg-stone-50/50 transition-colors group">
-                            <td class="p-2 border-r border-stone-200 sticky-col bg-white">
-                                <div class="flex flex-col">
-                                    <span class="text-[9px] font-bold text-stone-400 uppercase tracking-widest">${statLabel}</span>
-                                    <span class="text-xs font-black text-stone-800 font-mono tracking-tight mt-0.5" id="top_lbl_${line.id}_${stat}">${topVal}</span>
+                    const topColor = stat === 'level' ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-950 dark:text-white';
+                    rowsHTML += `
+                        <tr class="hover:bg-stone-50/50 dark:hover:bg-stone-800/50 transition-colors">
+                            <td class="p-2 border-r border-stone-200 dark:border-stone-800 sticky-col bg-stone-50/50 dark:bg-stone-900/50">
+                                <div class="flex items-center justify-between px-1">
+                                    <span class="text-sm" title="${stat}">${STAT_EMOJIS[stat]}</span>
+                                    <span class="text-[11px] font-black ${topColor} font-mono tracking-tight" id="top_lbl_${line.id}_${stat}">${maxStats[stat] || 0}</span>
                                 </div>
                             </td>
-                            ${tdHtml}
+                            ${tdsHTML}
                         </tr>`;
                 });
 
-                const section = document.createElement('div');
-                section.className = "bg-white rounded-2xl border border-ark-border shadow-soft overflow-hidden";
-                section.innerHTML = `
-                    <div class="p-4 border-b border-stone-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-stone-50/50">
-                        <h3 class="text-base font-extrabold text-stone-900 flex items-center gap-2">
-                            <span class="bg-orange-100 text-orange-600 p-1.5 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg></span>
-                            ${line.name}
-                        </h3>
-                        <div class="flex gap-1.5 w-full md:w-auto overflow-x-auto no-scrollbar pb-1 md:pb-0">
-                            <label class="shrink-0 bg-stone-100 hover:bg-stone-200 text-stone-700 text-[10px] font-bold py-1.5 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer transition">
+                const suggestionsHTML = calculateGenderIndependentSuggestions(line, maxStats);
+
+                lineSection.innerHTML = `
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-2 border-b border-stone-100 dark:border-stone-800">
+                        <div>
+                            <span class="text-[9px] bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-400 font-extrabold px-1.5 py-0.5 rounded-md tech-font">PROJEKT</span>
+                            <h3 class="text-sm font-black text-stone-900 dark:text-white flex items-center gap-1.5 mt-0.5">🧬 ${line.name}</h3>
+                        </div>
+                        <div class="flex gap-1.5 w-full sm:w-auto justify-end overflow-x-auto no-scrollbar pb-1 sm:pb-0">
+                            <label class="shrink-0 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-[10px] font-bold py-1.5 px-2.5 rounded-lg flex items-center gap-1 cursor-pointer transition">
                                 <span>📸 Scannen</span>
-                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="startGeminiScan(event, '${line.id}')">
+                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="triggerImageScan(event, '${line.id}')">
                             </label>
-                            <button onclick="saveToBestand('${line.id}')" class="shrink-0 bg-stone-900 hover:bg-stone-800 text-white text-[10px] font-bold py-1.5 px-3 rounded-lg flex items-center gap-1.5 transition">💾 Archivieren</button>
-                            <button onclick="deleteLine('${line.id}')" class="shrink-0 text-stone-400 hover:bg-red-50 hover:text-red-600 px-2 rounded-lg transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                            <button onclick="addDinoInline('${line.id}')" class="shrink-0 bg-ark-accent hover:bg-orange-700 text-white text-[10px] font-bold py-1.5 px-2.5 rounded-lg flex items-center gap-1 transition shadow-sm">
+                                <span>+ Dino</span>
+                            </button>
+                            <button onclick="transferLineToBestandPrompt('${line.id}')" class="shrink-0 bg-stone-800 dark:bg-stone-700 hover:bg-stone-700 dark:hover:bg-stone-600 text-white text-[10px] font-bold py-1.5 px-2.5 rounded-lg flex items-center gap-1 transition shadow-sm">
+                                💾 Archivieren
+                            </button>
+                            <button onclick="deleteSpecificLine('${line.id}')" class="shrink-0 text-stone-400 hover:text-red-600 dark:hover:text-red-400 transition px-2 rounded-lg bg-stone-50 dark:bg-stone-900 hover:bg-red-50 dark:hover:bg-red-900/30">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
                         </div>
                     </div>
-                    
-                    <div class="grid grid-cols-1 xl:grid-cols-4">
-                        <div class="xl:col-span-3 border-r border-stone-100 table-container">
+
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                        <div class="lg:col-span-3 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden flex flex-col bg-stone-50/30 dark:bg-stone-900/30 table-container">
                             <div class="overflow-x-auto w-full no-scrollbar relative">
-                                <table class="w-full text-left border-collapse min-w-max">
-                                    <thead><tr class="bg-stone-50/30"><th class="sticky-col sticky-header bg-white border-r border-b border-stone-200 w-[70px]"></th>${thHtml}</tr></thead>
-                                    <tbody class="divide-y divide-stone-100 bg-white">${rowsHtml}</tbody>
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-stone-100/60 dark:bg-stone-800/80 border-b border-stone-200 dark:border-stone-700">
+                                            <th class="p-2 text-[9px] uppercase tracking-wider text-stone-500 dark:text-stone-400 font-bold sticky-col border-r border-stone-200 dark:border-stone-700 min-w-[70px] text-center bg-stone-100/60 dark:bg-stone-800/80">Top<br>Werte</th>
+                                            ${thsHTML}
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-stone-100 dark:divide-stone-800/50">
+                                        ${rowsHTML}
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
-                        
-                        <!-- Suggestions Container (Updated Dynamically) -->
-                        <div class="bg-stone-50 p-4" id="sugg_container_${line.id}">
-                            <!-- Content generated by updateSuggestionsDOM -->
+
+                        <div class="space-y-3" id="sugg_container_${line.id}">
+                            ${suggestionsHTML}
                         </div>
-                    </div>
-                `;
-                container.appendChild(section);
+                    </div>`;
                 
-                updateSuggestionsDOM(line.id);
+                container.appendChild(lineSection);
             });
 
-            // "Neues Projekt" Button am Ende der Liste einfügen
             const addLineCard = document.createElement('div');
-            addLineCard.className = "flex justify-center pt-4";
-            addLineCard.innerHTML = `
-                <button onclick="openModal('modal-add-line')" class="bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold py-3.5 px-6 rounded-xl shadow-soft transition transform active:scale-95 flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                    Neues Projekt hinzufügen
-                </button>
-            `;
+            addLineCard.className = "flex justify-center pt-2";
+            addLineCard.innerHTML = `<button onclick="openModal('modal-add-line')" class="bg-stone-900 dark:bg-stone-800 hover:bg-stone-800 dark:hover:bg-stone-700 text-white text-xs font-bold py-3.5 px-6 rounded-xl shadow-sm transition transform active:scale-95 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>Neues Projekt hinzufügen</button>`;
             container.appendChild(addLineCard);
         }
 
-        function updateSuggestionsDOM(lineId) {
-            const container = document.getElementById(`sugg_container_${lineId}`);
-            if (!container) return;
-            
-            const line = appState.lines.find(l => l.id === lineId);
-            if (!line) return;
+        function calculateGenderIndependentSuggestions(line, maxStats) {
+            const activePool = line.dinos.filter(d => !d.isTrash);
+            if (activePool.length < 2) return `<div class="bg-stone-50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-800 p-3 rounded-xl text-[10px] text-stone-500 dark:text-stone-400 text-center font-medium">Mindestens 2 aktive Dinos benötigt.</div>`;
 
-            const active = line.dinos.filter(d => !d.isTrash);
-            
-            const maxStats = {};
-            STAT_KEYS.forEach(s => maxStats[s] = active.length ? Math.max(...active.map(d => d[s] || 0)) : 0);
-
-            let html = `<div class="flex items-center gap-2 mb-3"><div class="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div><h4 class="text-xs font-bold text-stone-800 uppercase tracking-wide">Paarungs-KI</h4></div>`;
-
-            if (active.length < 2) {
-                html += `<div class="bg-white border border-stone-200 rounded-xl p-3 text-[10px] text-stone-500 text-center shadow-sm">Mindestens 2 aktive Dinos benötigt.</div>`;
-                container.innerHTML = html;
-                return;
-            }
-
-            const getBests = (d) => STAT_KEYS.filter(s => d[s] === maxStats[s] && maxStats[s] > 0);
+            const getBests = (dino) => BREEDING_STATS.filter(s => dino[s] === maxStats[s] && maxStats[s] > 0);
+            const ignoreGender = appState.settings.ignoreGender;
             const pairs = [];
 
-            for (let i = 0; i < active.length; i++) {
-                for (let j = i + 1; j < active.length; j++) {
-                    const d1 = active[i], d2 = active[j];
-                    const b1 = getBests(d1), b2 = getBests(d2);
-                    const combined = [...new Set([...b1, ...b2])];
+            for (let i = 0; i < activePool.length; i++) {
+                for (let j = i + 1; j < activePool.length; j++) {
+                    const d1 = activePool[i], d2 = activePool[j];
+                    if (!ignoreGender && d1.gender === d2.gender) continue;
 
-                    if (combined.length > b1.length && combined.length > b2.length) {
-                        pairs.push({ d1, d2, b1, b2, combined, score: combined.length });
+                    const d1Bests = getBests(d1), d2Bests = getBests(d2);
+                    const combinedBests = Array.from(new Set([...d1Bests, ...d2Bests]));
+
+                    if (combinedBests.length > d1Bests.length && combinedBests.length > d2Bests.length) {
+                        // Calculate minimum possible hatch level that secures at least 1 top stat
+                        const baseWorstLevel = 1 + BREEDING_STATS.reduce((sum, s) => sum + Math.min(d1[s] || 0, d2[s] || 0), 0);
+                        let minLvl = Infinity;
+                        
+                        combinedBests.forEach(s => {
+                            const statMin = Math.min(d1[s] || 0, d2[s] || 0);
+                            const statTop = maxStats[s];
+                            const levelWithJustThisTop = baseWorstLevel - statMin + statTop;
+                            if (levelWithJustThisTop < minLvl) minLvl = levelWithJustThisTop;
+                        });
+
+                        pairs.push({ d1, d2, d1Bests, d2Bests, combinedBests, score: combinedBests.length, minLvl });
                     }
                 }
             }
@@ -753,73 +845,65 @@
             pairs.sort((a, b) => b.score - a.score);
             const topPairs = pairs.slice(0, 2);
 
+            let html = `<div class="flex items-center gap-2 mb-3"><span class="text-pink-500 text-lg">❤️</span><h4 class="text-xs font-bold text-stone-800 dark:text-stone-200 uppercase tracking-wide">Paarungs Optionen</h4></div>`;
+
             if (topPairs.length === 0) {
-                html += `<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-[10px] text-emerald-700 font-bold text-center shadow-sm">Werte sind optimal vereint!</div>`;
-            } else {
-                html += `<div class="space-y-2">`;
-                topPairs.forEach((p, idx) => {
-                    const warn = p.d1.gender === p.d2.gender ? `<span class="bg-red-100 text-red-600 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ml-2">Gleiches Geschlecht!</span>` : '';
-                    
-                    html += `
-                        <div class="bg-white rounded-xl border border-stone-200 p-3 shadow-sm hover:shadow transition">
-                            <div class="flex justify-between items-center mb-1.5">
-                                <span class="text-[9px] font-extrabold text-stone-400 uppercase tracking-wider">Option ${idx+1}</span>
-                                <span class="text-[9px] font-black bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded font-mono">${p.combined.length}/${STAT_KEYS.length} Werten</span>
-                            </div>
-                            <div class="space-y-1 mb-2">
-                                <div class="flex justify-between items-center text-[10px]">
-                                    <span class="font-bold truncate max-w-[80px] ${p.d1.gender==='M'?'text-sky-600':'text-pink-600'}">${p.d1.name}</span>
-                                    <span class="text-[8px] font-mono text-stone-400">${p.b1.map(s=>STAT_LABELS[s].substring(0,3)).join(', ')}</span>
-                                </div>
-                                <div class="flex justify-between items-center text-[10px]">
-                                    <span class="font-bold truncate max-w-[80px] ${p.d2.gender==='M'?'text-sky-600':'text-pink-600'}">${p.d2.name}</span>
-                                    <span class="text-[8px] font-mono text-stone-400">${p.b2.map(s=>STAT_LABELS[s].substring(0,3)).join(', ')}</span>
-                                </div>
-                            </div>
-                            <div class="bg-stone-50 rounded-lg p-1.5 border border-stone-100">
-                                <span class="block text-[8px] text-stone-500 font-bold mb-0.5 uppercase">Ergebnis-Pool: ${warn}</span>
-                                <span class="text-[9px] font-bold text-ark-accent font-mono">${p.combined.map(s=>STAT_LABELS[s]).join(', ')}</span>
-                            </div>
-                        </div>`;
-                });
-                html += `</div>`;
+                return html + `<div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 p-3 rounded-xl text-[10px] text-emerald-700 dark:text-emerald-400 font-bold text-center">Spitzenwerte sind optimal vereint!</div>`;
             }
-            container.innerHTML = html;
+
+            html += `<div class="space-y-3">`;
+            topPairs.forEach((pair, idx) => {
+                const sameGender = pair.d1.gender === pair.d2.gender;
+                const poolHTML = pair.combinedBests.map(s => `<span class="whitespace-nowrap">${STAT_EMOJIS[s]} <span class="font-black text-stone-900 dark:text-white">${maxStats[s]}</span></span>`).join(' <span class="text-stone-300 dark:text-stone-600 px-0.5">|</span> ');
+
+                html += `
+                    <div class="bg-white dark:bg-stone-800 p-3 rounded-xl border border-stone-200 dark:border-stone-700 shadow-sm transition-colors duration-300">
+                        <div class="flex justify-between items-center border-b border-stone-100 dark:border-stone-700/50 pb-1.5 mb-2">
+                            <span class="font-black text-stone-400 dark:text-stone-500 text-[9px] uppercase tracking-wider">Option #${idx + 1}</span>
+                            <span class="text-[9px] bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-md font-bold tech-font flex items-center gap-1 shadow-sm border border-emerald-100 dark:border-emerald-800/50">⬆️ Min Lvl ${pair.minLvl}</span>
+                        </div>
+                        <div class="space-y-1 text-[10px] font-medium">
+                            <div class="flex justify-between">
+                                <span class="truncate max-w-[90px] ${pair.d1.gender==='M'?'text-sky-600 dark:text-sky-400':'text-pink-600 dark:text-pink-400'}">${pair.d1.name} (${pair.d1.gender==='M'?'♂':'♀'})</span>
+                                <span class="text-[9px] font-mono text-stone-500 dark:text-stone-400">${pair.d1Bests.map(s => STAT_EMOJIS[s]).join('') || '-'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="truncate max-w-[90px] ${pair.d2.gender==='M'?'text-sky-600 dark:text-sky-400':'text-pink-600 dark:text-pink-400'}">${pair.d2.name} (${pair.d2.gender==='M'?'♂':'♀'})</span>
+                                <span class="text-[9px] font-mono text-stone-500 dark:text-stone-400">${pair.d2Bests.map(s => STAT_EMOJIS[s]).join('') || '-'}</span>
+                            </div>
+                        </div>
+                        <div class="bg-stone-50 dark:bg-stone-900/50 p-2 rounded-lg border border-stone-100 dark:border-stone-700/50 mt-2.5 flex flex-col sm:flex-row sm:items-center gap-2">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="text-[8px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest bg-stone-200/50 dark:bg-stone-800 px-1.5 py-0.5 rounded">Ergebnis-Pool</span>
+                                ${sameGender ? `<span class="text-[8px] font-black text-amber-800 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 px-1.5 py-0.5 rounded uppercase border border-amber-200 dark:border-amber-800/50">Gleiches Geschlecht</span>` : ''}
+                            </div>
+                            <div class="text-[10px] tech-font flex flex-wrap items-center mt-1 sm:mt-0">
+                                ${poolHTML}
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            return html + `</div>`;
         }
 
-        function saveToBestand(lineId) {
+        function transferLineToBestandPrompt(lineId) {
             const line = appState.lines.find(l => l.id === lineId);
-            const active = line.dinos.filter(d => !d.isTrash);
-            if (active.length === 0) return showToast('Keine aktiven Dinos vorhanden', 'error');
+            const activePool = line.dinos.filter(d => !d.isTrash);
+            if (activePool.length === 0) return showToast("Keine Dinos ohne Ausschuss vorhanden!", "error");
 
-            const tops = {};
-            STAT_KEYS.forEach(s => tops[s] = Math.max(...active.map(d => d[s] || 0)));
-            let lvl = 0; STAT_KEYS.forEach(s => lvl += tops[s]); tops.level = lvl + 1;
+            const maxStats = {};
+            BREEDING_STATS.forEach(stat => maxStats[stat] = Math.max(...activePool.map(d => d[stat] || 0)));
+            let sum = 0; BREEDING_STATS.forEach(s => sum += maxStats[s]); maxStats.level = sum + 1;
 
-            customPrompt('Bestand sichern', 'Unter welchem Namen soll dieser Meilenstein gespeichert werden?', `${line.name} Master`, (name) => {
+            customPrompt("In Bestand archivieren", "Name für diesen fertigen Stamm:", `${line.name} Master`, name => {
                 if (name) {
-                    appState.bestand.unshift({
-                        id: 'b_' + Date.now(),
-                        lineName: line.name,
-                        displayName: name,
-                        date: new Date().toLocaleDateString('de-DE'),
-                        stats: tops
-                    });
-                    saveState();
-                    showToast('Im Bestand archiviert!');
-                    renderBestand();
-
+                    appState.bestand.unshift({ id: 'b_' + Date.now(), lineName: line.name, displayName: name, date: new Date().toLocaleDateString('de-DE'), stats: maxStats });
+                    saveToLocalStorage(); showToast(`Archiviert im Bestand!`); renderBestand();
                     setTimeout(() => {
-                        customConfirm(
-                            'Projekt löschen?',
-                            `Möchtest du das ursprüngliche Projekt "${line.name}" jetzt löschen?`,
-                            (confirmDelete) => {
-                                if (confirmDelete) {
-                                    deleteLine(lineId, true);
-                                }
-                            }
-                        );
-                    }, 400); 
+                        customConfirm('Projekt löschen?', `Möchtest du das Projekt "${line.name}" jetzt aufräumen/löschen?`, confirmDelete => {
+                            if (confirmDelete) deleteSpecificLine(lineId, true);
+                        });
+                    }, 400);
                 }
             });
         }
@@ -829,74 +913,47 @@
             const ph = document.getElementById('bestand-placeholder');
             grid.innerHTML = '';
 
-            if (appState.bestand.length === 0) {
-                ph.classList.remove('hidden');
-                return;
-            }
+            if (appState.bestand.length === 0) { ph.classList.remove('hidden'); return; }
             ph.classList.add('hidden');
 
-            const SHORT_LABELS = {
-                hp: '🩸',
-                stamina: '⚡',
-                oxygen: '💨',
-                food: '🍖',
-                weight: '⚖️',
-                melee: '💪',
-                level: 'Lvl'
-            };
-
             appState.bestand.forEach(item => {
-                let statsHtml = '';
-                const allKeys = [...STAT_KEYS, 'level'];
-                allKeys.forEach(s => {
-                    const value = item.stats[s] || 0;
-                    const label = SHORT_LABELS[s];
-                    const isLvl = s === 'level';
-                    const textColorClass = isLvl ? 'text-orange-600 font-extrabold' : 'text-stone-700 font-bold';
-                    
-                    statsHtml += `
-                        <div class="text-center py-1 bg-stone-50/50 rounded border border-stone-100/60">
-                            <span class="block text-[11px] leading-none mb-1">${label}</span>
-                            <span class="text-[10px] tech-font leading-none block ${textColorClass}">${value}</span>
-                        </div>
-                    `;
+                const card = document.createElement('div');
+                card.className = "bg-white dark:bg-ark-darkPanel border border-stone-200 dark:border-stone-800 rounded-xl p-3 shadow-sm flex flex-col justify-between transition-colors duration-300";
+                
+                let statsHTML = '';
+                STAT_KEYS.forEach(stat => {
+                    const val = item.stats[stat] || 0;
+                    const color = stat === 'level' ? 'text-orange-600 dark:text-orange-400 font-black' : 'text-stone-800 dark:text-stone-200 font-bold';
+                    statsHTML += `
+                        <div class="text-center py-1 bg-stone-50/50 dark:bg-stone-900/50 rounded border border-stone-100/60 dark:border-stone-800 transition-colors duration-300">
+                            <span class="block text-sm leading-none mb-0.5">${STAT_EMOJIS[stat]}</span>
+                            <span class="text-[10px] tech-font leading-none block ${color}">${val}</span>
+                        </div>`;
                 });
 
-                grid.innerHTML += `
-                    <div class="bg-white rounded-2xl border border-ark-border shadow-soft p-4 flex flex-col justify-between">
+                card.innerHTML = `
+                    <div class="flex justify-between items-start pb-1.5 border-b border-stone-100 dark:border-stone-800 mb-2">
                         <div>
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <h3 class="text-sm font-extrabold text-stone-900">${item.displayName}</h3>
-                                    <span class="text-[9px] text-stone-400 uppercase tracking-widest font-bold block mt-0.5">${item.lineName} • ${item.date}</span>
-                                </div>
-                                <button onclick="delBestand('${item.id}')" class="text-stone-300 hover:text-red-500 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                            </div>
-                            <div class="grid grid-cols-7 gap-1 my-2 bg-stone-50/20 p-1 rounded-lg border border-stone-100/40">
-                                ${statsHtml}
-                            </div>
+                            <span class="text-[8px] text-ark-accent font-black tracking-wider uppercase tech-font">ARCHIV</span>
+                            <h3 class="text-xs font-black text-stone-900 dark:text-white mt-0.5">${item.displayName}</h3>
+                            <span class="text-[8px] text-stone-400 dark:text-stone-500 font-medium block mt-0.5">${item.lineName} • ${item.date}</span>
                         </div>
-                        <button onclick="openCopyModal('${item.id}')" class="w-full bg-stone-900 hover:bg-stone-800 text-white text-[10px] font-bold py-2 rounded-xl transition flex justify-center items-center gap-1.5 shadow-sm mt-2">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
-                            In Projekt laden
+                        <button onclick="deleteBestandItemPrompt('${item.id}')" class="text-stone-400 dark:text-stone-500 hover:text-red-600 dark:hover:text-red-400 transition p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 my-2">${statsHTML}</div>
+                    <div class="mt-2 pt-2 border-t border-stone-100 dark:border-stone-800">
+                        <button onclick="openCopyBestandModal('${item.id}')" class="w-full bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 border border-orange-200 dark:border-orange-800/50 text-ark-accent text-[9px] font-black py-1.5 rounded-lg transition uppercase tracking-tight flex items-center justify-center gap-1.5">
+                            <span>🧬 In Linie kopieren</span>
                         </button>
                     </div>`;
+                grid.appendChild(card);
             });
         }
 
-        function delBestand(id) {
-            customConfirm('Löschen', 'Archivierten Eintrag entfernen?', (ok) => {
-                if(ok) {
-                    appState.bestand = appState.bestand.filter(b => b.id !== id);
-                    saveState(); renderBestand();
-                }
-            });
-        }
-
-        function openCopyModal(id) {
+        function openCopyBestandModal(id) {
             document.getElementById('copy-bestand-id').value = id;
             const sel = document.getElementById('select-copy-target-line');
-            sel.innerHTML = `<option value="NEW">➕ Als neues Projekt anlegen</option>`;
+            sel.innerHTML = `<option value="NEW">➕ Neues Projekt erstellen</option>`;
             appState.lines.forEach(l => sel.innerHTML += `<option value="${l.id}">🧬 ${l.name}</option>`);
             openModal('modal-copy-bestand');
         }
@@ -906,207 +963,50 @@
             const targetId = document.getElementById('select-copy-target-line').value;
             const item = appState.bestand.find(b => b.id === bId);
             
-            let targetLine;
-            if (targetId === 'NEW') {
-                targetLine = { id: 'line_' + Date.now(), name: `${item.displayName} Zucht`, dinos: [] };
-                appState.lines.unshift(targetLine);
-            } else {
-                targetLine = appState.lines.find(l => l.id === targetId);
-            }
+            let line = targetId === 'NEW' ? { id: 'line_' + Date.now(), name: `${item.displayName} Projekt`, dinos: [] } : appState.lines.find(l => l.id === targetId);
+            if (targetId === 'NEW') appState.lines.unshift(line);
 
-            let lvl = 0; STAT_KEYS.forEach(s => lvl += item.stats[s]);
-            
-            targetLine.dinos.push({
-                id: 'dino_' + Date.now(),
-                name: `${item.displayName} Stamm`,
-                gender: 'M',
-                hp: item.stats.hp, stamina: item.stats.stamina, oxygen: item.stats.oxygen, 
-                food: item.stats.food, weight: item.stats.weight, melee: item.stats.melee,
-                isTrash: false
-            });
+            let lvl = 0; BREEDING_STATS.forEach(s => lvl += item.stats[s]);
+            line.dinos.push({ id: 'dino_' + Date.now(), name: `${item.displayName} Stamm`, gender: 'M', hp: item.stats.hp, stamina: item.stats.stamina, oxygen: item.stats.oxygen, food: item.stats.food, weight: item.stats.weight, melee: item.stats.melee, level: lvl + 1, isTrash: false });
 
-            saveState();
-            closeModal('modal-copy-bestand');
-            renderAllLines();
-            switchTab('tab-breeding');
-            showToast('Erfolgreich geladen!');
+            saveToLocalStorage(); closeModal('modal-copy-bestand'); renderAllLines(); switchTab('tab-breeding'); showToast('Erfolgreich geladen!');
         }
 
-        function clearBestandPrompt() {
-            customConfirm('Bestand leeren', 'Alles löschen?', ok => {
-                if(ok) { appState.bestand = []; saveState(); renderBestand(); }
-            });
-        }
-
-        function saveGeminiApiKey(val) {
-            localStorage.setItem('ark_gemini_api_key', val.trim());
-            showToast('API Key lokal gespeichert');
-        }
-
-        function startGeminiScan(e, lineId) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const key = localStorage.getItem('ark_gemini_api_key')?.trim();
-            if (!key) return showToast('Bitte hinterlege zuerst deinen Gemini API-Key in den Einstellungen.', 'error');
-
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const scale = Math.min(800 / img.width, 800 / img.height, 1);
-                    canvas.width = img.width * scale; canvas.height = img.height * scale;
-                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
-                    const base64 = canvas.toDataURL('image/jpeg', 0.8);
-                    
-                    // Show Loading
-                    document.getElementById('scan-loading-preview-img').src = base64;
-                    const overlay = document.getElementById('scan-loading-overlay');
-                    overlay.classList.remove('hidden');
-                    requestAnimationFrame(() => overlay.classList.remove('opacity-0'));
-
-                    callGeminiAPI(base64.split(',')[1], lineId, key);
-                };
-                img.src = ev.target.result;
-            };
-            reader.readAsDataURL(file);
-            e.target.value = '';
-        }
-
-        async function callGeminiAPI(base64Data, lineId, key) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${key}`;
-            const prompt = `Extract ARK dinosaur stats from image. Return ONLY pure JSON. Schema: {"hp": number, "stamina": number, "oxygen": number, "food": number, "weight": number, "melee": number, "gender": "M" or "W"}. Find wild points if visible, else raw values. Map logically.`;
-
-            let delay = 1000;
-            let success = false;
-            let res = null;
-            let lastError = null;
-
-            for (let attempt = 1; attempt <= 5; attempt++) {
-                try {
-                    res = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: 'image/jpeg', data: base64Data } }] }],
-                            generationConfig: { responseMimeType: "application/json" }
-                        })
-                    });
-
-                    if (res.ok) {
-                        success = true;
-                        break;
-                    } else if (res.status === 429) {
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2;
-                    } else {
-                        const errData = await res.json().catch(() => ({}));
-                        throw new Error(errData?.error?.message || `HTTP ${res.status}`);
-                    }
-                } catch (err) {
-                    lastError = err;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                }
-            }
-
-            const overlay = document.getElementById('scan-loading-overlay');
-            overlay.classList.add('opacity-0');
-            setTimeout(() => overlay.classList.add('hidden'), 300);
-
-            if (success && res) {
-                try {
-                    const data = await res.json();
-                    if (data.candidates && data.candidates[0].content.parts[0].text) {
-                        const stats = JSON.parse(data.candidates[0].content.parts[0].text);
-                        applyScannedStats(stats, lineId);
-                    } else {
-                        showToast('Antwort von Gemini enthielt keine analysierbaren Daten.', 'error');
-                    }
-                } catch (parseErr) {
-                    showToast('Fehler beim Parsen der API-Antwort: ' + parseErr.message, 'error');
-                }
-            } else {
-                showToast('Scan fehlgeschlagen: ' + (lastError ? lastError.message : 'Unbekannter API-Fehler'), 'error');
-            }
-        }
-
-        function applyScannedStats(stats, lineId) {
-            const line = appState.lines.find(l => l.id === lineId);
-            line.dinos.push({
-                id: 'dino_' + Date.now(),
-                name: 'Gescannter Dino',
-                gender: stats.gender === 'W' ? 'W' : 'M',
-                hp: stats.hp || 0, stamina: stats.stamina || 0, oxygen: stats.oxygen || 0,
-                food: stats.food || 0, weight: stats.weight || 0, melee: stats.melee || 0,
-                isTrash: false
-            });
-            saveState();
-            renderAllLines();
-            showToast('Daten erfolgreich extrahiert!');
-        }
+        function deleteBestandItemPrompt(id) { customConfirm("Bestand löschen", "Stamm aus Archiv entfernen?", ok => { if(ok) { appState.bestand = appState.bestand.filter(b => b.id !== id); saveToLocalStorage(); renderBestand(); }}); }
+        function clearBestandPrompt() { customConfirm("Bestand leeren", "Kompletten Bestand unwiderruflich leeren?", ok => { if(ok) { appState.bestand = []; saveToLocalStorage(); renderBestand(); }}); }
 
         function exportBackup() {
             try {
-                const jsonString = JSON.stringify(appState, null, 2);
-                const blob = new Blob([jsonString], { type: "application/json" });
+                const blob = new Blob([JSON.stringify(appState, null, 2)], { type: "application/json" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                
-                const dateStr = new Date().toISOString().slice(0, 10);
-                a.href = url; 
-                a.download = `ark_breeder_backup_${dateStr}.json`;
-                
-                document.body.appendChild(a);
-                a.click();
-                
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                showToast('Backup erfolgreich heruntergeladen!');
-            } catch(err) {
-                console.error("JSON Export Fehler:", err);
-                showToast('Export fehlgeschlagen!', 'error');
-            }
+                a.href = url; a.download = `ark_hub_backup_${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+                showToast("Backup erfolgreich geladen!");
+            } catch(e) { showToast("Export Fehler", "error"); }
         }
 
         function importBackup(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = ev => {
+            const file = e.target.files[0]; if (!file) return;
+            const r = new FileReader();
+            r.onload = ev => {
                 try {
-                    const textContent = ev.target.result.replace(/^\uFEFF/, '').trim();
-                    const state = JSON.parse(textContent);
-                    
-                    if (state && (state.lines || state.bestand)) {
-                        appState.lines = Array.isArray(state.lines) ? state.lines : [];
-                        appState.bestand = Array.isArray(state.bestand) ? state.bestand : [];
-                        saveState();
-                        renderAllLines(); 
-                        renderBestand();
-                        switchTab('tab-breeding');
-                        showToast('Backup erfolgreich geladen!', 'success');
-                    } else {
-                        showToast('Datei enthält keine kompatiblen Ark-Daten.', 'error');
+                    const data = JSON.parse(ev.target.result.replace(/^\uFEFF/, '').trim());
+                    if (data.lines || data.bestand) {
+                        appState.lines = Array.isArray(data.lines) ? data.lines : [];
+                        appState.bestand = Array.isArray(data.bestand) ? data.bestand : [];
+                        if (data.settings) appState.settings = data.settings;
+                        saveToLocalStorage(); loadFromLocalStorage(); renderAllLines(); renderBestand(); switchTab('tab-breeding');
+                        showToast("Sicherung geladen!");
                     }
-                } catch(err) { 
-                    console.error("Import Fehler:", err);
-                    showToast('Fehlerhaftes Dateiformat (JSON ungültig)', 'error'); 
-                }
+                } catch(err) { showToast("Ungültige Datei", "error"); }
             };
-            reader.readAsText(file);
-            e.target.value = '';
+            r.readAsText(file); e.target.value = '';
         }
 
         function confirmResetAllPrompt() {
-            customConfirm('Werksreset', 'Alle Daten löschen?', ok => {
-                if(ok) {
-                    localStorage.removeItem('ark_hub_v4');
-                    appState = { lines: [], bestand: [] };
-                    initDefaultData(); renderAllLines(); renderBestand();
-                    showToast('Reset erfolgreich');
-                }
+            customConfirm("Werksreset", "ALLE Daten komplett löschen?", ok => {
+                if(ok) { localStorage.removeItem('ark_hub_v4'); appState = {lines:[], bestand:[], settings:{darkMode:false, ignoreGender:false}}; saveToLocalStorage(); loadFromLocalStorage(); renderAllLines(); renderBestand(); showToast("App zurückgesetzt."); }
             });
         }
     </script>
