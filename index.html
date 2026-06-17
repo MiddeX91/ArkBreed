@@ -1,1033 +1,563 @@
 <!DOCTYPE html>
-<html lang="de" class="light">
+<html lang="de" class="antialiased">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ARK: Survival Ascended - Breeding Hub</title>
-    <!-- Tailwind CSS CDN -->
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
                     colors: {
                         ark: {
-                            bg: '#fbfaf7', /* Warmes Creme-Weiß */
-                            panel: '#ffffff', /* Reines Weiß für Karten */
-                            panelHeader: '#f3ede2', /* Warmes Sand-Beige */
-                            accent: '#ea580c', /* Kräftiges Orange */
+                            bg: '#f8f6f0',
+                            panel: '#ffffff',
+                            accent: '#ea580c',
                             accentHover: '#c2410c',
-                            accentGlow: 'rgba(234, 88, 12, 0.08)',
-                            male: '#0284c7', /* Sky Blue */
-                            female: '#db2777', /* Pink */
-                            trash: '#fee2e2' /* Sanftes Rot für Löschkandidaten */
+                            male: '#0284c7',
+                            female: '#db2777',
+                            border: '#e5e0d8'
                         }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
                     }
                 }
             }
         }
     </script>
-    <!-- Google Fonts: Inter & Share Tech Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            background-color: theme('colors.ark.bg');
+            background-image: radial-gradient(theme('colors.stone.200') 1px, transparent 0);
+            background-size: 20px 20px;
         }
-        .tech-font {
-            font-family: 'Share Tech Mono', monospace;
+        
+        /* Sticky Table Configuration */
+        .table-container {
+            position: relative;
+            z-index: 1;
         }
-        /* Sticky First Column for easy scrolling on small phone screens */
         .sticky-col {
             position: sticky;
             left: 0;
-            background-color: #fcfbfa !important; /* light warm background */
+            background-color: #faf8f5 !important;
             z-index: 10;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+            border-right: 1px solid theme('colors.ark.border');
         }
-        th.sticky-col {
-            background-color: #f3ede2 !important; /* matches warm panel header */
+        .sticky-header {
+            z-index: 11;
         }
-        /* Clean hide of scrollbars but preserve swipe gestures */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
+        
+        /* Hide Scrollbar but keep functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Custom Input Number hiding arrows */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none; margin: 0;
         }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        input[type="number"] { -moz-appearance: textfield; }
+
+        /* Modal Transitions */
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 200ms ease-out, transform 200ms ease-out; }
+        .modal-exit { opacity: 1; transform: scale(1); }
+        .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 150ms ease-in, transform 150ms ease-in; }
     </style>
 </head>
-<body class="bg-ark-bg text-stone-800 min-h-screen flex flex-col justify-between pb-16 md:pb-0 selection:bg-ark-accent selection:text-white">
+<body class="text-stone-800 min-h-screen flex flex-col justify-between pb-20 md:pb-6 selection:bg-ark-accent selection:text-white">
 
-    <header class="border-b border-stone-200 bg-white/95 backdrop-blur sticky top-0 z-40 px-3 py-2 sm:px-6 shadow-sm">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
-            <div class="flex items-center gap-2.5">
-                <div class="p-2 bg-orange-100 rounded-lg border border-orange-200">
-                    <svg class="w-5 h-5 text-ark-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-                    </svg>
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-ark-border shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl shadow-sm text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
                 </div>
                 <div>
-                    <h1 class="text-sm font-bold tracking-wider text-stone-900 uppercase flex items-center gap-1.5">
-                        ARK <span class="text-ark-accent tech-font">Breeding Hub</span>
+                    <h1 class="text-sm font-extrabold tracking-wide text-stone-900 uppercase">
+                        ARK <span class="text-ark-accent font-mono tracking-tighter">Breeder</span>
                     </h1>
-                    <p class="text-[9px] text-stone-500 uppercase tracking-tight">Smartphone-optimierter Zuchtplaner</p>
+                    <p class="text-[10px] font-medium text-stone-500 uppercase tracking-widest">Smart Management</p>
                 </div>
             </div>
 
-            <!-- DESKTOP TOP BAR NAV (Hidden on mobile) -->
-            <div class="hidden md:flex bg-stone-100 p-1 rounded-lg border border-stone-200">
-                <button onclick="switchTab('tab-breeding')" id="btn-tab-breeding" class="px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 bg-ark-accent text-white shadow">
-                    🧬 Zuchtlinien
-                </button>
-                <button onclick="switchTab('tab-bestand')" id="btn-tab-bestand" class="px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 text-stone-600 hover:text-stone-900">
-                    🦖 Bestand
-                </button>
-                <button onclick="switchTab('tab-settings')" id="btn-tab-settings" class="px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 text-stone-600 hover:text-stone-900">
-                    ⚙️ Backup / Gemini
-                </button>
-            </div>
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex bg-stone-100/50 p-1 rounded-lg border border-stone-200">
+                <button onclick="switchTab('tab-breeding')" id="btn-tab-breeding" class="nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all bg-white text-ark-accent shadow-sm ring-1 ring-stone-200">🧬 Zuchtlinien</button>
+                <button onclick="switchTab('tab-bestand')" id="btn-tab-bestand" class="nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all text-stone-500 hover:text-stone-900">🦖 Bestand</button>
+                <button onclick="switchTab('tab-settings')" id="btn-tab-settings" class="nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all text-stone-500 hover:text-stone-900">⚙️ System</button>
+            </nav>
         </div>
     </header>
 
-    <!-- TOAST ALERTS CONTAINER -->
-    <div id="toast-container" class="fixed bottom-20 md:bottom-5 right-4 left-4 md:left-auto z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-    <main class="flex-grow max-w-7xl w-full mx-auto px-2 py-3 sm:px-4 lg:px-8 space-y-4">
+    <main class="flex-grow w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 space-y-6">
         
-        <!-- TAB: LINIEN -->
-        <div id="tab-breeding" class="space-y-6">
-            <!-- List of All Breeding Lines will render here -->
-            <div id="lines-container" class="space-y-8"></div>
+        <!-- ==================== TAB: ZUCHTLINIEN ==================== -->
+        <div id="tab-breeding" class="space-y-6 animate-fade-in">
+            <div id="lines-container" class="space-y-8">
+                <!-- DYNAMICALLY RENDERED LINES GO HERE -->
+            </div>
         </div>
 
-        <!-- TAB: BESTAND -->
-        <div id="tab-bestand" class="hidden space-y-3">
-            <div class="flex justify-between items-center bg-white p-3.5 rounded-xl border border-stone-200 shadow-sm">
+        <!-- ==================== TAB: BESTAND ==================== -->
+        <div id="tab-bestand" class="hidden space-y-6 animate-fade-in">
+            <div class="bg-white p-4 rounded-2xl border border-ark-border shadow-soft flex justify-between items-center">
                 <div>
-                    <h2 class="text-xs font-bold text-stone-900 uppercase tracking-wider">Mein Bestand (Fertige Dinos)</h2>
-                    <p class="text-[10px] text-stone-500">Gesicherte Meilensteine und fertige Brutpaare.</p>
+                    <h2 class="text-sm font-extrabold text-stone-800 uppercase tracking-wide">Archivierter Bestand</h2>
+                    <p class="text-xs text-stone-500 mt-0.5">Gesicherte Spitzenwerte und fertige Zuchttiere.</p>
                 </div>
-                <button onclick="clearBestandPrompt()" class="text-[10px] bg-red-50 hover:bg-red-100 border border-red-100 text-red-600 px-3 py-1.5 rounded-lg transition font-semibold">
-                    Bestand leeren
+                <button onclick="clearBestandPrompt()" class="bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 px-3 py-2 rounded-xl text-xs font-bold transition">
+                    Leeren
                 </button>
             </div>
 
-            <!-- Bestand Cards Grid -->
-            <div id="bestand-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+            <div id="bestand-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
 
-            <div id="bestand-placeholder" class="hidden p-10 text-center text-stone-400 bg-white rounded-xl border border-stone-200">
-                <p class="font-medium text-xs">Bestandsarchiv ist leer.</p>
-                <p class="text-[9px] text-stone-500 mt-0.5">Sichere fertige Zuchtlinien über den Button der jeweiligen Linie ab.</p>
+            <div id="bestand-placeholder" class="hidden p-12 text-center bg-white rounded-2xl border border-stone-200 shadow-sm">
+                <div class="text-4xl mb-3">🦕</div>
+                <h3 class="text-sm font-bold text-stone-700">Das Archiv ist leer</h3>
+                <p class="text-xs text-stone-500 mt-1 max-w-xs mx-auto">Sichere Top-Werte aus deinen Zuchtprojekten, um sie später wiederzuverwenden.</p>
             </div>
         </div>
 
-        <!-- TAB: SETTINGS -->
-        <div id="tab-settings" class="hidden max-w-xl mx-auto space-y-4">
-            <div class="bg-white p-4 rounded-xl border border-stone-200 shadow-sm space-y-4">
-                <div>
-                    <h2 class="text-xs font-bold text-stone-900 uppercase tracking-wider border-b border-stone-100 pb-2">Datentransfer & Gemini-Schnittstelle</h2>
-                    <p class="text-[10px] text-stone-500 mt-1">Sichere deine Daten lokal oder konfiguriere die Bilderkennung für deine Screenshots.</p>
+        <!-- ==================== TAB: SETTINGS ==================== -->
+        <div id="tab-settings" class="hidden animate-fade-in max-w-2xl mx-auto w-full">
+            <div class="bg-white rounded-2xl border border-ark-border shadow-soft overflow-hidden">
+                <div class="p-5 border-b border-stone-100 bg-stone-50/50">
+                    <h2 class="text-sm font-extrabold text-stone-800 uppercase tracking-wide">System & Daten</h2>
+                    <p class="text-xs text-stone-500 mt-1">Verwalte deine Speicherstände und KI-Einstellungen.</p>
                 </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="p-3 bg-stone-50 rounded-lg border border-stone-200 flex flex-col justify-between col-span-2 sm:col-span-1">
-                        <div>
-                            <h3 class="text-xs font-bold text-stone-800">📥 Exportieren</h3>
-                            <p class="text-[9px] text-stone-500 mb-2">Sichere den gesamten Stand als JSON-Datei.</p>
+                
+                <div class="p-5 space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-4 bg-stone-50 rounded-xl border border-stone-200 hover:border-stone-300 transition">
+                            <h3 class="text-xs font-bold text-stone-800 flex items-center gap-1.5 mb-1">
+                                <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Backup sichern
+                            </h3>
+                            <p class="text-[10px] text-stone-500 mb-3 leading-relaxed">Lädt alle Projekte und Bestände als JSON-Datei herunter.</p>
+                            <button onclick="exportBackup()" class="w-full bg-white border border-stone-300 hover:bg-stone-50 text-stone-700 text-xs py-2 rounded-lg font-bold shadow-sm transition">Download JSON</button>
                         </div>
-                        <button onclick="exportBackup()" class="w-full bg-stone-800 hover:bg-stone-700 text-white text-[10px] py-1.5 rounded-md font-bold transition active:scale-95">
-                            Download JSON
-                        </button>
+                        <div class="p-4 bg-stone-50 rounded-xl border border-stone-200 hover:border-stone-300 transition">
+                            <h3 class="text-xs font-bold text-stone-800 flex items-center gap-1.5 mb-1">
+                                <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                Backup laden
+                            </h3>
+                            <p class="text-[10px] text-stone-500 mb-3 leading-relaxed">Überschreibt die aktuellen Daten mit einer JSON-Sicherung.</p>
+                            <label class="block w-full bg-stone-800 hover:bg-stone-700 text-white text-center text-xs py-2 rounded-lg font-bold shadow-sm transition cursor-pointer">
+                                <span>Datei auswählen</span>
+                                <input type="file" accept=".json,application/json,text/plain" class="hidden" onchange="importBackup(event)">
+                            </label>
+                        </div>
                     </div>
 
-                    <div class="p-3 bg-stone-50 rounded-lg border border-stone-200 flex flex-col justify-between col-span-2 sm:col-span-1">
-                        <div>
-                            <h3 class="text-xs font-bold text-stone-800">📤 Importieren</h3>
-                            <p class="text-[9px] text-stone-500 mb-2">Importiere eine JSON-Backup-Datei.</p>
-                        </div>
-                        <label class="block w-full bg-stone-800 hover:bg-stone-700 text-white text-[10px] py-1.5 rounded-md text-center font-bold cursor-pointer transition active:scale-95">
-                            <span>JSON einlesen</span>
-                            <input type="file" id="json-backup-input" accept=".json" class="hidden" onchange="importBackup(event)">
-                        </label>
+                    <div class="p-4 bg-orange-50/50 rounded-xl border border-orange-100">
+                        <h3 class="text-xs font-bold text-orange-900 flex items-center gap-1.5 mb-1">✨ Gemini KI-Integration</h3>
+                        <p class="text-[10px] text-orange-700/80 mb-3 leading-relaxed">Für automatische Screenshot-Auswertung wird ein Google Gemini API-Key benötigt (kostenlos).</p>
+                        <input type="password" id="gemini-api-key-input" placeholder="AIzaSy..." class="w-full bg-white border border-orange-200 rounded-lg px-3 py-2 text-stone-900 text-xs focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition shadow-sm" onchange="saveGeminiApiKey(this.value)">
                     </div>
 
-                    <div class="p-3 bg-stone-50 rounded-lg border border-stone-200 flex flex-col justify-between col-span-2">
-                        <div>
-                            <h3 class="text-xs font-bold text-stone-800">🔑 Gemini API-Key (Optional)</h3>
-                            <p class="text-[9px] text-stone-500 mb-2">Trage hier deinen eigenen kostenlosen Gemini-Key ein.</p>
-                        </div>
-                        <input type="password" id="gemini-api-key-input" placeholder="AIzaSy..." class="w-full bg-white border border-stone-300 rounded px-2.5 py-1.5 text-stone-900 text-xs focus:outline-none focus:border-ark-accent mb-2" onchange="saveGeminiApiKey(this.value)">
-                    </div>
-                </div>
-
-                <div class="border-t border-stone-200 pt-3">
-                    <h3 class="text-xs font-bold text-red-600 mb-2">⚠️ Gefahrenzone</h3>
-                    <div class="flex justify-between items-center bg-red-50 border border-red-100 p-3 rounded-lg">
-                        <div>
-                            <p class="text-xs font-bold text-red-800">Alles löschen</p>
-                            <p class="text-[9px] text-red-600">Löscht dauerhaft alle Linien und Bestände!</p>
-                        </div>
-                        <button onclick="confirmResetAllPrompt()" class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-md transition active:scale-95">
-                            Hard-Reset
+                    <div class="pt-4 border-t border-stone-100">
+                        <button onclick="confirmResetAllPrompt()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            Alle Daten unwiderruflich löschen
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-
     </main>
 
-    <!-- FOOTER -->
-    <footer class="hidden md:block border-t border-stone-200 bg-white py-3 text-center text-[10px] text-stone-400 mt-6">
-        <p>© 2026 ARK Breeding Hub • Warm, Mobile & AI Scanning Edition</p>
-    </footer>
-
-    <!-- APP NAVIGATION BAR -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 z-50 flex justify-around items-center py-1.5 px-1 shadow-[0_-2px_10px_rgba(0,0,0,0.04)]">
-        <button onclick="switchTab('tab-breeding')" id="mobile-nav-breeding" class="flex flex-col items-center text-ark-accent py-0.5 w-1/3 transition">
-            <span class="text-base">🧬</span>
-            <span class="text-[9px] font-bold tracking-tight">Zuchtlinien</span>
-        </button>
-        <button onclick="switchTab('tab-bestand')" id="mobile-nav-bestand" class="flex flex-col items-center text-stone-400 py-0.5 w-1/3 transition">
-            <span class="text-base">🦖</span>
-            <span class="text-[9px] font-bold tracking-tight">Bestand</span>
-        </button>
-        <button onclick="switchTab('tab-settings')" id="mobile-nav-settings" class="flex flex-col items-center text-stone-400 py-0.5 w-1/3 transition">
-            <span class="text-base">⚙️</span>
-            <span class="text-[9px] font-bold tracking-tight">Backup</span>
-        </button>
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-stone-200 z-40 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+        <div class="flex justify-around items-center p-2">
+            <button onclick="switchTab('tab-breeding')" id="nav-mobile-tab-breeding" class="nav-btn-mobile flex flex-col items-center p-2 text-ark-accent w-1/3">
+                <span class="text-xl mb-0.5">🧬</span>
+                <span class="text-[9px] font-bold tracking-wide">Zucht</span>
+            </button>
+            <button onclick="switchTab('tab-bestand')" id="nav-mobile-tab-bestand" class="nav-btn-mobile flex flex-col items-center p-2 text-stone-400 w-1/3">
+                <span class="text-xl mb-0.5">🦖</span>
+                <span class="text-[9px] font-bold tracking-wide">Bestand</span>
+            </button>
+            <button onclick="switchTab('tab-settings')" id="nav-mobile-tab-settings" class="nav-btn-mobile flex flex-col items-center p-2 text-stone-400 w-1/3">
+                <span class="text-xl mb-0.5">⚙️</span>
+                <span class="text-[9px] font-bold tracking-wide">System</span>
+            </button>
+        </div>
     </nav>
 
+    <!-- TOASTS -->
+    <div id="toast-container" class="fixed top-16 md:top-auto md:bottom-6 right-4 left-4 md:left-auto z-[100] flex flex-col gap-2 pointer-events-none items-end"></div>
 
-    <!-- ==================== MODALS ==================== -->
+    <!-- DIALOG OVERLAYS -->
+    <div id="overlay-bg" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 hidden transition-opacity duration-200 opacity-0"></div>
 
-    <!-- CUSTOM CONFIRM DIALOG MODAL -->
-    <div id="modal-confirm" class="fixed inset-0 bg-stone-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4 z-[100]">
-        <div class="bg-white border border-stone-200 rounded-xl p-4 max-w-xs w-full shadow-xl space-y-3">
-            <h4 id="confirm-title" class="text-xs font-bold text-stone-900 uppercase tracking-wider">Bestätigen</h4>
-            <p id="confirm-message" class="text-[11px] text-stone-600 leading-relaxed"></p>
-            <div class="flex justify-end gap-1.5 text-[10px] font-bold pt-1">
-                <button id="btn-confirm-cancel" class="px-3 py-1.5 border border-stone-200 rounded text-stone-600 hover:bg-stone-50 active:scale-95">Abbrechen</button>
-                <button id="btn-confirm-ok" class="px-3 py-1.5 bg-red-600 text-white rounded hover:bg-red-500 active:scale-95">Ausführen</button>
+    <!-- Confirm Modal -->
+    <div id="modal-confirm" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4 pointer-events-none">
+        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5 pointer-events-auto transform transition-all duration-200 scale-95 opacity-0 border border-stone-100">
+            <h3 id="confirm-title" class="text-sm font-extrabold text-stone-900 uppercase tracking-wide mb-2"></h3>
+            <p id="confirm-message" class="text-xs text-stone-600 leading-relaxed mb-5"></p>
+            <div class="flex gap-2 justify-end">
+                <button id="btn-confirm-cancel" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition">Abbrechen</button>
+                <button id="btn-confirm-ok" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition shadow-sm">Bestätigen</button>
             </div>
         </div>
     </div>
 
-    <!-- CUSTOM PROMPT DIALOG MODAL -->
-    <div id="modal-prompt" class="fixed inset-0 bg-stone-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4 z-[100]">
-        <div class="bg-white border border-stone-200 rounded-xl p-4 max-w-xs w-full shadow-xl space-y-3">
-            <h4 id="prompt-title" class="text-xs font-bold text-stone-900 uppercase tracking-wider">Eingabe erforderlich</h4>
-            <p id="prompt-message" class="text-[11px] text-stone-600"></p>
-            <input type="text" id="prompt-input" class="w-full bg-stone-50 border border-stone-300 rounded px-2.5 py-1.5 text-stone-900 text-xs focus:outline-none focus:border-ark-accent">
-            <div class="flex justify-end gap-1.5 text-[10px] font-bold pt-1">
-                <button id="btn-prompt-cancel" class="px-3 py-1.5 border border-stone-200 rounded text-stone-600 hover:bg-stone-50 active:scale-95">Abbrechen</button>
-                <button id="btn-prompt-ok" class="px-3 py-1.5 bg-ark-accent text-white rounded hover:bg-orange-700 active:scale-95">Speichern</button>
+    <!-- Prompt Modal -->
+    <div id="modal-prompt" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4 pointer-events-none">
+        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5 pointer-events-auto transform transition-all duration-200 scale-95 opacity-0 border border-stone-100">
+            <h3 id="prompt-title" class="text-sm font-extrabold text-stone-900 uppercase tracking-wide mb-2"></h3>
+            <p id="prompt-message" class="text-xs text-stone-600 leading-relaxed mb-4"></p>
+            <input type="text" id="prompt-input" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-ark-accent focus:bg-white transition mb-5">
+            <div class="flex gap-2 justify-end">
+                <button id="btn-prompt-cancel" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition">Abbrechen</button>
+                <button id="btn-prompt-ok" class="px-4 py-2 bg-ark-accent hover:bg-orange-700 text-white text-xs font-bold rounded-xl transition shadow-sm">Speichern</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: ADD LINE -->
-    <div id="modal-add-line" class="fixed inset-0 bg-stone-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white border border-stone-200 rounded-xl p-4 max-w-xs w-full shadow-xl space-y-3">
-            <h3 class="text-xs font-bold text-stone-950 uppercase tracking-wider border-b border-stone-100 pb-1.5">Neue Zuchtlinie</h3>
-            <div>
-                <label class="block text-[9px] uppercase font-bold text-stone-500 mb-1">Name der Zuchtlinie</label>
-                <input type="text" id="input-line-name" placeholder="z.B. Megaloceros Melee" class="w-full bg-stone-50 border border-stone-300 rounded px-2.5 py-1.5 text-stone-900 text-xs focus:outline-none focus:border-ark-accent">
-            </div>
-            <div class="flex justify-end gap-1.5 text-[10px] font-bold pt-1">
-                <button onclick="closeModal('modal-add-line')" class="px-3 py-1.5 border border-stone-200 rounded text-stone-600 hover:bg-stone-50">Abbrechen</button>
-                <button onclick="createNewLine()" class="px-3 py-1.5 bg-ark-accent text-white rounded hover:bg-orange-700">Erstellen</button>
+    <!-- Add Line Modal -->
+    <div id="modal-add-line" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4 pointer-events-none">
+        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5 pointer-events-auto transform transition-all duration-200 scale-95 opacity-0 border border-stone-100">
+            <h3 class="text-sm font-extrabold text-stone-900 uppercase tracking-wide mb-4">Neues Projekt</h3>
+            <label class="block text-[10px] font-bold text-stone-500 uppercase mb-1.5 ml-1">Name der Zuchtlinie</label>
+            <input type="text" id="input-line-name" placeholder="z.B. Boss Rex Melee" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900 focus:bg-white transition mb-5">
+            <div class="flex gap-2 justify-end">
+                <button onclick="closeModal('modal-add-line')" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition">Abbrechen</button>
+                <button onclick="createNewLine()" class="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl transition shadow-sm">Erstellen</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: COPY BESTAND TO LINE -->
-    <div id="modal-copy-bestand" class="fixed inset-0 bg-stone-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4 z-[110]">
-        <div class="bg-white border border-stone-200 rounded-xl p-4 max-w-xs w-full shadow-xl space-y-3">
-            <h4 class="text-xs font-bold text-stone-900 uppercase tracking-wider border-b border-stone-100 pb-1.5">Bestand in Linie kopieren</h4>
-            <p class="text-[10px] text-stone-600 leading-relaxed">Wähle aus, in welche Zuchtlinie du diesen Bestand-Dino als neuen Zuchtkandidaten importieren möchtest:</p>
+    <!-- Copy to Line Modal -->
+    <div id="modal-copy-bestand" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4 pointer-events-none">
+        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5 pointer-events-auto transform transition-all duration-200 scale-95 opacity-0 border border-stone-100">
+            <h3 class="text-sm font-extrabold text-stone-900 uppercase tracking-wide mb-2">In Projekt kopieren</h3>
+            <p class="text-xs text-stone-600 leading-relaxed mb-4">Wähle die Zuchtlinie, um diesen Stamm als Elternteil hinzuzufügen.</p>
             <input type="hidden" id="copy-bestand-id">
-            
-            <div>
-                <label class="block text-[9px] uppercase font-bold text-stone-500 mb-1">Zuchtlinie auswählen</label>
-                <select id="select-copy-target-line" class="w-full bg-stone-50 border border-stone-300 rounded px-2.5 py-1.5 text-stone-900 text-xs focus:outline-none focus:border-ark-accent">
-                    <!-- Loaded dynamically -->
-                </select>
-            </div>
-
-            <div class="flex justify-end gap-1.5 text-[10px] font-bold pt-1">
-                <button onclick="closeModal('modal-copy-bestand')" class="px-3 py-1.5 border border-stone-200 rounded text-stone-600 hover:bg-stone-50">Abbrechen</button>
-                <button onclick="executeCopyBestandToLine()" class="px-3 py-1.5 bg-ark-accent text-white rounded hover:bg-orange-700">Kopieren</button>
+            <select id="select-copy-target-line" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-ark-accent focus:bg-white transition mb-5 appearance-none cursor-pointer"></select>
+            <div class="flex gap-2 justify-end">
+                <button onclick="closeModal('modal-copy-bestand')" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition">Abbrechen</button>
+                <button onclick="executeCopyBestandToLine()" class="px-4 py-2 bg-ark-accent hover:bg-orange-700 text-white text-xs font-bold rounded-xl transition shadow-sm">Einfügen</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: SCAN REVIEW MODAL -->
-    <div id="modal-scan-review" class="fixed inset-0 bg-stone-900/60 backdrop-blur-xs hidden flex items-center justify-center p-4 z-[120]">
-        <div class="bg-white border border-stone-200 rounded-xl p-4 max-w-sm w-full shadow-2xl space-y-3 max-h-[92vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-stone-100 pb-1.5">
-                <h3 class="text-xs font-black text-stone-900 uppercase tracking-wider">🔍 Scan-Ergebnis überprüfen</h3>
-                <button onclick="closeModal('modal-scan-review')" class="text-stone-400 hover:text-stone-800 text-lg font-bold">&times;</button>
-            </div>
-            
-            <div class="flex gap-2.5 bg-stone-50 p-2 rounded-lg border border-stone-100 items-center">
-                <img id="scan-preview-img" class="w-14 h-14 object-cover rounded border border-stone-200 shadow-sm" src="">
-                <div class="text-[9px] text-stone-500 flex flex-col">
-                    <span class="font-bold text-stone-700">Gemini KI-Erkennung</span>
-                    <span>Vergleicht Werte live mit deiner Linie.</span>
-                </div>
-            </div>
-
-            <!-- DYNAMIC TARGET SCREEN DECISION BANNER -->
-            <div id="scan-review-verdict" class="p-2 rounded text-center text-xs font-black uppercase tracking-wider transition-all duration-300">
-                Lade Datenvergleich...
-            </div>
-
-            <div class="grid grid-cols-2 gap-2.5">
-                <div>
-                    <label class="block text-[8px] uppercase font-bold text-stone-500 mb-0.5">Dino-Name</label>
-                    <input type="text" id="scan-review-name" class="w-full bg-stone-50 border border-stone-300 rounded px-2 py-1 text-stone-900 text-xs focus:outline-none focus:border-ark-accent font-bold">
-                </div>
-                <div>
-                    <label class="block text-[8px] uppercase font-bold text-stone-500 mb-0.5">Geschlecht</label>
-                    <div class="flex gap-1 mt-0.5">
-                        <button id="scan-review-gender-m" onclick="setScanReviewGender('M')" class="flex-1 py-1 rounded text-[10px] font-bold border transition">♂ M</button>
-                        <button id="scan-review-gender-w" onclick="setScanReviewGender('W')" class="flex-1 py-1 rounded text-[10px] font-bold border transition">♀ W</button>
-                        <input type="hidden" id="scan-review-gender-val" value="M">
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <span class="block text-[8px] uppercase font-bold text-stone-500 mb-1 border-b border-stone-100 pb-0.5">Werte (Stats)</span>
-                <div class="grid grid-cols-3 gap-1.5">
-                    <!-- HP -->
-                    <div class="relative bg-stone-50 p-1.5 rounded border border-stone-200 flex flex-col items-center">
-                        <label class="block text-[8px] text-stone-500 font-bold mb-0.5 text-center">HP</label>
-                        <input type="number" id="scan-review-hp" oninput="validateScanReviewStats()" class="w-full text-center bg-white border border-stone-300 rounded py-0.5 text-xs font-mono font-bold">
-                        <span id="scan-review-hp-badge" class="absolute -top-1 -right-1 text-[6px] font-black px-1 rounded shadow-sm hidden"></span>
-                        <span class="text-[7px] text-stone-400 mt-1">Top: <span id="scan-review-hp-top-val" class="font-bold text-stone-700">0</span></span>
-                    </div>
-                    <!-- Stamina -->
-                    <div class="relative bg-stone-50 p-1.5 rounded border border-stone-200 flex flex-col items-center">
-                        <label class="block text-[8px] text-stone-500 font-bold mb-0.5 text-center">Stamina</label>
-                        <input type="number" id="scan-review-stamina" oninput="validateScanReviewStats()" class="w-full text-center bg-white border border-stone-300 rounded py-0.5 text-xs font-mono font-bold">
-                        <span id="scan-review-stamina-badge" class="absolute -top-1 -right-1 text-[6px] font-black px-1 rounded shadow-sm hidden"></span>
-                        <span class="text-[7px] text-stone-400 mt-1">Top: <span id="scan-review-stamina-top-val" class="font-bold text-stone-700">0</span></span>
-                    </div>
-                    <!-- Oxygen -->
-                    <div class="relative bg-stone-50 p-1.5 rounded border border-stone-200 flex flex-col items-center">
-                        <label class="block text-[8px] text-stone-500 font-bold mb-0.5 text-center">Oxygen</label>
-                        <input type="number" id="scan-review-oxygen" oninput="validateScanReviewStats()" class="w-full text-center bg-white border border-stone-300 rounded py-0.5 text-xs font-mono font-bold">
-                        <span id="scan-review-oxygen-badge" class="absolute -top-1 -right-1 text-[6px] font-black px-1 rounded shadow-sm hidden"></span>
-                        <span class="text-[7px] text-stone-400 mt-1">Top: <span id="scan-review-oxygen-top-val" class="font-bold text-stone-700">0</span></span>
-                    </div>
-                    <!-- Food -->
-                    <div class="relative bg-stone-50 p-1.5 rounded border border-stone-200 flex flex-col items-center">
-                        <label class="block text-[8px] text-stone-500 font-bold mb-0.5 text-center">Food</label>
-                        <input type="number" id="scan-review-food" oninput="validateScanReviewStats()" class="w-full text-center bg-white border border-stone-300 rounded py-0.5 text-xs font-mono font-bold">
-                        <span id="scan-review-food-badge" class="absolute -top-1 -right-1 text-[6px] font-black px-1 rounded shadow-sm hidden"></span>
-                        <span class="text-[7px] text-stone-400 mt-1">Top: <span id="scan-review-food-top-val" class="font-bold text-stone-700">0</span></span>
-                    </div>
-                    <!-- Weight -->
-                    <div class="relative bg-stone-50 p-1.5 rounded border border-stone-200 flex flex-col items-center">
-                        <label class="block text-[8px] text-stone-500 font-bold mb-0.5 text-center">Weight</label>
-                        <input type="number" id="scan-review-weight" oninput="validateScanReviewStats()" class="w-full text-center bg-white border border-stone-300 rounded py-0.5 text-xs font-mono font-bold">
-                        <span id="scan-review-weight-badge" class="absolute -top-1 -right-1 text-[6px] font-black px-1 rounded shadow-sm hidden"></span>
-                        <span class="text-[7px] text-stone-400 mt-1">Top: <span id="scan-review-weight-top-val" class="font-bold text-stone-700">0</span></span>
-                    </div>
-                    <!-- Melee -->
-                    <div class="relative bg-stone-50 p-1.5 rounded border border-stone-200 flex flex-col items-center">
-                        <label class="block text-[8px] text-stone-500 font-bold mb-0.5 text-center">Melee</label>
-                        <input type="number" id="scan-review-melee" oninput="validateScanReviewStats()" class="w-full text-center bg-white border border-stone-300 rounded py-0.5 text-xs font-mono font-bold">
-                        <span id="scan-review-melee-badge" class="absolute -top-1 -right-1 text-[6px] font-black px-1 rounded shadow-sm hidden"></span>
-                        <span class="text-[7px] text-stone-400 mt-1">Top: <span id="scan-review-melee-top-val" class="font-bold text-stone-700">0</span></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 pt-1 border-t border-stone-100">
-                <div class="col-span-2">
-                    <label class="block text-[8px] uppercase font-bold text-stone-500 mb-0.5">Level (berechnet)</label>
-                    <input type="number" id="scan-review-level" readonly class="w-full text-center bg-stone-100 border border-stone-200 rounded py-1 text-xs font-mono font-bold text-stone-700 select-none" value="1">
-                </div>
-            </div>
-
-            <input type="hidden" id="scan-review-target-line">
-
-            <div class="flex justify-end gap-1.5 text-[10px] font-bold pt-2 border-t border-stone-100">
-                <button onclick="closeModal('modal-scan-review')" class="px-3 py-1.5 border border-stone-200 rounded text-stone-600 hover:bg-stone-50">Verwerfen</button>
-                <button onclick="saveScanReviewResult()" class="px-3 py-1.5 bg-ark-accent text-white rounded hover:bg-orange-700 shadow-sm transition active:scale-95">Hinzufügen</button>
-            </div>
+    <!-- AI Scan Loading Overlay -->
+    <div id="scan-loading-overlay" class="fixed inset-0 bg-stone-950/90 backdrop-blur-sm z-[200] hidden flex-col items-center justify-center p-6 text-white transition-opacity duration-300 opacity-0">
+        <div class="relative w-24 h-24 mb-6">
+            <svg class="absolute inset-0 w-full h-full text-stone-800 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <div class="absolute inset-0 flex items-center justify-center text-3xl animate-pulse">📸</div>
         </div>
+        <h3 class="font-bold tracking-widest uppercase text-sm mb-2 font-mono text-orange-400">Analysiere Bilddaten</h3>
+        <p class="text-xs text-stone-400 max-w-[250px] text-center leading-relaxed">Gemini extrahiert die Statuswerte. Dies dauert einen kurzen Moment...</p>
+        <img id="scan-loading-preview-img" class="mt-8 w-24 h-24 object-cover rounded-xl border-2 border-stone-800 opacity-50 shadow-2xl" src="">
     </div>
 
-    <!-- SCANNING FULLSCREEN OVERLAY LOADING SPIN -->
-    <div id="scan-loading-overlay" class="fixed inset-0 bg-stone-950/80 backdrop-blur-md hidden flex flex-col items-center justify-center p-6 z-[200]">
-        <div class="relative w-24 h-24 mb-6 flex items-center justify-center">
-            <div class="absolute inset-0 border-4 border-orange-500/10 rounded-full"></div>
-            <div class="absolute inset-0 border-4 border-transparent border-t-ark-accent rounded-full animate-spin"></div>
-            <span class="text-2xl animate-bounce">📸</span>
-        </div>
-        <h3 class="text-white font-bold tracking-wider uppercase text-sm tech-font">Lese Dino-Daten ein...</h3>
-        <p class="text-xs text-orange-200/70 mt-1 max-w-xs text-center">Gemini analysiert deinen Screenshot. Das kann 2-4 Sekunden dauern...</p>
-        <div class="mt-8 max-w-xs bg-white/5 border border-white/10 p-3 rounded-lg text-center">
-            <img id="scan-loading-preview-img" class="mx-auto w-16 h-16 object-cover rounded opacity-40 border border-white/10 mb-2" src="">
-            <p class="text-[9px] text-stone-400 italic">Vorteilhaft: Fotografiere den Bildschirm gerade und nah.</p>
-        </div>
-    </div>
-
-
-    <!-- ==================== SCRIPTS ==================== -->
     <script>
-        let appState = {
-            lines: [],
-            bestand: []
-        };
-
-        const STAT_KEYS = ['hp', 'stamina', 'oxygen', 'food', 'weight', 'melee', 'level'];
-        const BREEDING_STATS = ['hp', 'stamina', 'oxygen', 'food', 'weight', 'melee'];
+        const STAT_KEYS = ['hp', 'stamina', 'oxygen', 'food', 'weight', 'melee'];
+        const STAT_LABELS = { hp: 'HP', stamina: 'Ausdauer', oxygen: 'Sauerstoff', food: 'Nahrung', weight: 'Gewicht', melee: 'Melee' };
         
-        const STAT_LABELS = {
-            hp: 'HP',
-            stamina: 'Ausdauer',
-            oxygen: 'Sauerstoff',
-            food: 'Nahrung',
-            weight: 'Gewicht',
-            melee: 'Melee',
-            level: 'Level'
-        };
+        let appState = { lines: [], bestand: [] };
 
-        // Application bootstrap
-        window.onload = function() {
-            loadFromLocalStorage();
-            
-            if (appState.bestand.length === 0 && appState.lines.length === 0) {
-                initializeDefaultDatabase();
-            }
+        window.onload = () => {
+            loadState();
+            if (appState.lines.length === 0 && appState.bestand.length === 0) initDefaultData();
             
             const savedKey = localStorage.getItem('ark_gemini_api_key');
-            if (savedKey) {
-                document.getElementById('gemini-api-key-input').value = savedKey;
-            }
+            if (savedKey) document.getElementById('gemini-api-key-input').value = savedKey.trim();
             
             renderAllLines();
             renderBestand();
         };
 
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `p-2.5 rounded-lg border text-[11px] font-semibold shadow-md transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto flex items-center justify-between gap-3 min-w-[200px] ${
-                type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' :
-                type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
-                'bg-stone-50 border-stone-200 text-stone-700'
-            }`;
-            toast.innerHTML = `
-                <span>${message}</span>
-                <button onclick="this.parentElement.remove()" class="text-stone-400 hover:text-stone-800">&times;</button>
-            `;
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 10);
-
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-1');
-                setTimeout(() => toast.remove(), 300);
-            }, 3500);
+        function loadState() {
+            try {
+                const data = localStorage.getItem('ark_hub_v4');
+                if (data) {
+                    appState = JSON.parse(data);
+                }
+                if (!appState.lines) appState.lines = [];
+                if (!appState.bestand) appState.bestand = [];
+            } catch (e) { console.error("Load error", e); }
         }
 
-        // Modern custom Touch Confirmation replace dialog
+        function saveState() {
+            localStorage.setItem('ark_hub_v4', JSON.stringify(appState));
+        }
+
+        function initDefaultData() {
+            appState = { lines: [], bestand: [] };
+            saveState();
+        }
+
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = type === 'success' ? 'bg-stone-900 text-white' : 'bg-red-600 text-white';
+            const icon = type === 'success' ? '✓' : '⚠';
+            
+            toast.className = `${colors} px-4 py-3 rounded-xl shadow-xl text-xs font-bold flex items-center gap-3 transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `<span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px]">${icon}</span> <span class="break-words max-w-[250px]">${msg}</span>`;
+            
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => toast.remove(), 300);
+            }, 6500);
+        }
+
+        function openModal(id) {
+            const overlay = document.getElementById('overlay-bg');
+            const modal = document.getElementById(id);
+            if (!overlay || !modal) return;
+            const content = modal.firstElementChild;
+            
+            overlay.classList.remove('hidden');
+            modal.classList.remove('hidden');
+            
+            requestAnimationFrame(() => {
+                overlay.classList.remove('opacity-0');
+                if (content) content.classList.remove('opacity-0', 'scale-95');
+            });
+        }
+
+        function closeModal(id) {
+            const overlay = document.getElementById('overlay-bg');
+            const modal = document.getElementById(id);
+            if (!overlay || !modal) return;
+            const content = modal.firstElementChild;
+            
+            overlay.classList.add('opacity-0');
+            if (content) content.classList.add('opacity-0', 'scale-95');
+            
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
         function customConfirm(title, message, callback) {
             document.getElementById('confirm-title').textContent = title;
             document.getElementById('confirm-message').textContent = message;
-            const modal = document.getElementById('modal-confirm');
-            modal.classList.remove('hidden');
             
             const btnOk = document.getElementById('btn-confirm-ok');
             const btnCancel = document.getElementById('btn-confirm-cancel');
             
-            const cleanup = () => {
-                modal.classList.add('hidden');
-                btnOk.replaceWith(btnOk.cloneNode(true));
-                btnCancel.replaceWith(btnCancel.cloneNode(true));
-            };
+            const cleanup = () => { closeModal('modal-confirm'); };
             
-            document.getElementById('btn-confirm-ok').addEventListener('click', () => {
-                cleanup();
-                callback(true);
-            });
-            document.getElementById('btn-confirm-cancel').addEventListener('click', () => {
-                cleanup();
-                callback(false);
-            });
+            btnOk.onclick = () => { cleanup(); callback(true); };
+            btnCancel.onclick = () => { cleanup(); callback(false); };
+            
+            openModal('modal-confirm');
         }
 
-        // Modern custom Touch Prompt input replace dialog
         function customPrompt(title, message, defaultValue, callback) {
             document.getElementById('prompt-title').textContent = title;
             document.getElementById('prompt-message').textContent = message;
             const input = document.getElementById('prompt-input');
             input.value = defaultValue;
-            const modal = document.getElementById('modal-prompt');
-            modal.classList.remove('hidden');
-            input.focus();
             
             const btnOk = document.getElementById('btn-prompt-ok');
             const btnCancel = document.getElementById('btn-prompt-cancel');
             
-            const cleanup = () => {
-                modal.classList.add('hidden');
-                btnOk.replaceWith(btnOk.cloneNode(true));
-                btnCancel.replaceWith(btnCancel.cloneNode(true));
-            };
+            const cleanup = () => { closeModal('modal-prompt'); };
             
-            document.getElementById('btn-prompt-ok').addEventListener('click', () => {
-                const val = document.getElementById('prompt-input').value;
-                cleanup();
-                callback(val);
-            });
-            document.getElementById('btn-prompt-cancel').addEventListener('click', () => {
-                cleanup();
-                callback(null);
-            });
-        }
-
-        function saveToLocalStorage() {
-            localStorage.setItem('ark_breeding_state_warm_v3', JSON.stringify(appState));
-        }
-
-        function loadFromLocalStorage() {
-            const data = localStorage.getItem('ark_breeding_state_warm_v3');
-            if (data) {
-                try {
-                    appState = JSON.parse(data);
-                    if (!appState.lines) appState.lines = [];
-                    if (!appState.bestand) appState.bestand = [];
-                } catch(e) {
-                    console.error("Fehler beim Laden von LocalStorage", e);
-                }
-            }
-        }
-
-        function initializeDefaultDatabase() {
-            const defaultLine = {
-                id: 'line_' + Date.now(),
-                name: 'Megalosaurus Brutlinie Alpha',
-                dinos: [
-                    {
-                        id: 'dino_template_1',
-                        name: 'Kandidat #01',
-                        gender: 'M',
-                        hp: 92,
-                        stamina: 80,
-                        oxygen: 0,
-                        food: 75,
-                        weight: 88,
-                        melee: 95,
-                        level: 431
-                    },
-                    {
-                        id: 'dino_template_2',
-                        name: 'Zuchtkuh #04',
-                        gender: 'W',
-                        hp: 80,
-                        stamina: 96,
-                        oxygen: 0,
-                        food: 84,
-                        weight: 80,
-                        melee: 102,
-                        level: 443
-                    }
-                ]
-            };
-            appState.lines.push(defaultLine);
-
-            appState.bestand = [
-                {
-                    id: 'b_maeguana',
-                    lineName: 'Abgeschlossenes Projekt',
-                    displayName: 'Maeguana',
-                    date: '15.06.2026',
-                    stats: { hp: 98, stamina: 106, oxygen: 0, food: 91, weight: 100, melee: 104, level: 500 }
-                },
-                {
-                    id: 'b_yuti',
-                    lineName: 'Abgeschlossenes Projekt',
-                    displayName: 'Yutisaurus',
-                    date: '15.06.2026',
-                    stats: { hp: 84, stamina: 76, oxygen: 89, food: 93, weight: 84, melee: 82, level: 509 }
-                }
-            ];
-            saveToLocalStorage();
+            btnOk.onclick = () => { cleanup(); callback(input.value); };
+            btnCancel.onclick = () => { callback(null); cleanup(); };
+            
+            openModal('modal-prompt');
+            setTimeout(() => input.focus(), 100);
         }
 
         function switchTab(tabId) {
-            document.getElementById('tab-breeding').classList.add('hidden');
-            document.getElementById('tab-bestand').classList.add('hidden');
-            document.getElementById('tab-settings').classList.add('hidden');
-            
+            ['tab-breeding', 'tab-bestand', 'tab-settings'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
             document.getElementById(tabId).classList.remove('hidden');
 
-            const desktopKeys = {
-                'tab-breeding': 'btn-tab-breeding',
-                'tab-bestand': 'btn-tab-bestand',
-                'tab-settings': 'btn-tab-settings'
-            };
-
-            Object.keys(desktopKeys).forEach(key => {
-                const btn = document.getElementById(desktopKeys[key]);
-                if (btn) {
-                    if (key === tabId) {
-                        btn.className = "px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 bg-ark-accent text-white shadow";
-                    } else {
-                        btn.className = "px-4 py-1 rounded-md text-xs font-semibold transition-all duration-200 text-stone-600 hover:text-stone-900";
-                    }
+            document.querySelectorAll('.nav-btn-desktop').forEach(btn => {
+                if (btn.id === `btn-${tabId}`) {
+                    btn.className = "nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all bg-white text-ark-accent shadow-sm ring-1 ring-stone-200";
+                } else {
+                    btn.className = "nav-btn-desktop px-4 py-1.5 rounded-md text-xs font-bold transition-all text-stone-500 hover:text-stone-900";
                 }
             });
 
-            const mobileKeys = {
-                'tab-breeding': 'mobile-nav-breeding',
-                'tab-bestand': 'mobile-nav-bestand',
-                'tab-settings': 'mobile-nav-settings'
-            };
-
-            Object.keys(mobileKeys).forEach(key => {
-                const btn = document.getElementById(mobileKeys[key]);
-                if (btn) {
-                    if (key === tabId) {
-                        btn.className = "flex flex-col items-center text-ark-accent py-0.5 w-1/3 transition";
-                    } else {
-                        btn.className = "flex flex-col items-center text-stone-400 py-0.5 w-1/3 transition";
-                    }
+            document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
+                if (btn.id === `nav-mobile-${tabId}`) {
+                    btn.className = "nav-btn-mobile flex flex-col items-center p-2 text-ark-accent w-1/3";
+                    btn.querySelector('span:last-child').classList.add('text-ark-accent');
+                } else {
+                    btn.className = "nav-btn-mobile flex flex-col items-center p-2 text-stone-400 w-1/3 hover:text-stone-600 transition";
+                    btn.querySelector('span:last-child').classList.remove('text-ark-accent');
                 }
             });
-
-            if (tabId === 'tab-bestand') renderBestand();
-            if (tabId === 'tab-breeding') renderAllLines();
-        }
-
-        function saveGeminiApiKey(val) {
-            localStorage.setItem('ark_gemini_api_key', val.trim());
-            showToast("Gemini API-Key lokal gesichert!");
         }
 
         function createNewLine() {
-            const nameInput = document.getElementById('input-line-name');
-            const name = nameInput.value.trim() || 'Neue Zuchtlinie';
-            const newLine = {
-                id: 'line_' + Date.now(),
-                name: name,
-                dinos: []
-            };
-            appState.lines.push(newLine);
-            nameInput.value = '';
+            const inp = document.getElementById('input-line-name');
+            const name = inp.value.trim() || 'Unbenanntes Projekt';
+            appState.lines.unshift({ id: 'line_' + Date.now(), name, dinos: [] });
+            inp.value = '';
+            saveState();
             closeModal('modal-add-line');
-            saveToLocalStorage();
             renderAllLines();
-            showToast(`Linie "${name}" angelegt!`);
+            showToast('Projekt erstellt');
         }
 
-        function deleteSpecificLine(lineId, skipConfirm = false) {
-            const activeLine = appState.lines.find(l => l.id === lineId);
-            if (!activeLine) return;
-
+        function deleteLine(id, skipConfirm = false) {
             const performDelete = () => {
-                appState.lines = appState.lines.filter(l => l.id !== lineId);
-                saveToLocalStorage();
+                appState.lines = appState.lines.filter(l => l.id !== id);
+                saveState();
                 renderAllLines();
-                showToast("Zuchtlinie gelöscht.");
+                showToast('Projekt gelöscht');
             };
 
             if (skipConfirm) {
                 performDelete();
             } else {
-                customConfirm(
-                    "Linie löschen",
-                    `Möchtest du die Zuchtlinie "${activeLine.name}" wirklich vollständig löschen?`,
-                    function(confirmed) {
-                        if (confirmed) {
-                            performDelete();
-                        }
-                    }
-                );
+                customConfirm('Projekt löschen', 'Bist du sicher? Alle Dinos in dieser Ansicht gehen verloren.', (ok) => {
+                    if (ok) performDelete();
+                });
             }
         }
 
-        function updateDinoStatInline(lineId, dinoId, statKey, value) {
+        function addDino(lineId) {
             const line = appState.lines.find(l => l.id === lineId);
             if (!line) return;
-            const dino = line.dinos.find(d => d.id === dinoId);
-            if (!dino) return;
-
-            dino[statKey] = parseInt(value) || 0;
-
-            let sum = 0;
-            BREEDING_STATS.forEach(k => sum += (dino[k] || 0));
-            dino.level = sum + 1;
-
-            const lvlEl = document.getElementById(`level-display-${dinoId}`);
-            if (lvlEl) lvlEl.value = dino.level;
-
-            saveToLocalStorage();
-        }
-
-        function updateDinoTextInline(lineId, dinoId, field, value) {
-            const line = appState.lines.find(l => l.id === lineId);
-            if (!line) return;
-            const dino = line.dinos.find(d => d.id === dinoId);
-            if (!dino) return;
-
-            dino[field] = value.trim();
-            saveToLocalStorage();
-        }
-
-        function toggleDinoGender(lineId, dinoId) {
-            const line = appState.lines.find(l => l.id === lineId);
-            if (!line) return;
-            const dino = line.dinos.find(d => d.id === dinoId);
-            if (!dino) return;
-
-            dino.gender = dino.gender === 'M' ? 'W' : 'M';
-            saveToLocalStorage();
-            renderAllLines(); 
-            showToast(`Geschlecht von "${dino.name}" auf ${dino.gender === 'M' ? '♂ Männlich' : '♀ Weiblich'} gesetzt.`);
-        }
-
-        function addDinoInline(lineId) {
-            const line = appState.lines.find(l => l.id === lineId);
-            if (!line) return;
-
             const newDino = {
-                id: 'dino_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                id: 'dino_' + Date.now() + Math.random().toString(36).substring(2,5),
                 name: `Dino #${line.dinos.length + 1}`,
                 gender: 'M',
-                hp: 0,
-                stamina: 0,
-                oxygen: 0,
-                food: 0,
-                weight: 0,
-                melee: 0,
-                level: 1,
+                hp: 0, stamina: 0, oxygen: 0, food: 0, weight: 0, melee: 0,
                 isTrash: false
             };
-
             line.dinos.push(newDino);
-            saveToLocalStorage();
+            saveState();
             renderAllLines();
-            showToast("Neuer Zuchtkandidat hinzugefügt!");
             
             setTimeout(() => {
-                const newInp = document.getElementById(`name-input-${newDino.id}`);
-                if (newInp) {
-                    newInp.focus();
-                    newInp.select();
-                }
+                const el = document.getElementById(`name_${newDino.id}`);
+                if (el) { el.focus(); el.select(); }
             }, 50);
         }
 
-        function deleteDinoInline(lineId, dinoId) {
-            const line = appState.lines.find(l => l.id === lineId);
-            if (!line) return;
-
-            customConfirm(
-                "Dino löschen",
-                "Möchtest du dieses Tier dauerhaft aus der Liste entfernen?",
-                function(confirmed) {
-                    if (confirmed) {
-                        line.dinos = line.dinos.filter(d => d.id !== dinoId);
-                        saveToLocalStorage();
-                        renderAllLines();
-                        showToast("Dino gelöscht.");
-                    }
+        function removeDino(lineId, dinoId) {
+            customConfirm('Dino entfernen', 'Möchtest du dieses Tier entfernen?', (ok) => {
+                if(ok) {
+                    const line = appState.lines.find(l => l.id === lineId);
+                    line.dinos = line.dinos.filter(d => d.id !== dinoId);
+                    saveState();
+                    renderAllLines();
                 }
-            );
+            });
         }
 
-        function onInlineInputBlur() {
-            renderAllLines();
-        }
-
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        // --- IMAGE EXTRACTION ENGINE (GEMINI 3 FLASH AS THE POWERFUL PROMPT REQUEST) ---
-        function triggerImageScan(event, lineId) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const maxDim = 1024;
-                    let width = img.width;
-                    let height = img.height;
-                    
-                    if (width > maxDim || height > maxDim) {
-                        if (width > height) {
-                            height = Math.round((height * maxDim) / width);
-                            width = maxDim;
-                        } else {
-                            width = Math.round((width * maxDim) / height);
-                            height = maxDim;
-                        }
-                    }
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.82);
-                    const rawBase64 = compressedBase64.split(',')[1];
-                    
-                    document.getElementById('scan-loading-preview-img').src = compressedBase64;
-                    document.getElementById('scan-loading-overlay').classList.remove('hidden');
-
-                    executeGeminiOCR(rawBase64, 'image/jpeg', lineId, compressedBase64);
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-            event.target.value = ''; 
-        }
-
-        async function executeGeminiOCR(base64Data, mimeType, lineId, previewSrc) {
-            const userSavedKey = localStorage.getItem('ark_gemini_api_key') || '';
-            const apiKey = userSavedKey; 
+        function toggleGender(lineId, dinoId) {
+            const line = appState.lines.find(l => l.id === lineId);
+            const dino = line.dinos.find(d => d.id === dinoId);
+            dino.gender = dino.gender === 'M' ? 'W' : 'M';
+            saveState();
             
-            // Verwende das angeforderte, aktuelle Modell gemini-3-flash-preview aus dem Upload
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-
-            const systemPrompt = `You are an expert ARK Survival Ascended dinosaur scanner. Look at this image of a dinosaur status screen, binoculars, awesome spyglass, or inventory view. Your task is to extract its name, gender, and the exact wild levels (or points) assigned to each stat. If points are not visible, look for raw values (like Health: 3500) and try to read those. Map them specifically to the required schema: 'hp', 'stamina', 'oxygen', 'food', 'weight', 'melee', 'level'. If a stat is not visible or says zero, use 0. Determine gender: if male ♂ use 'M', if female ♀ use 'W'. Choose an appropriate Dino name if not explicitly custom. Return only a single valid JSON object following the schema structure. Do not include notes or description fields.`;
-            const queryText = "Extract dinosaur name, gender, and stats.";
-
-            const payload = {
-                contents: [{
-                    parts: [
-                        { text: queryText },
-                        { inlineData: { mimeType: mimeType, data: base64Data } }
-                    ]
-                }],
-                systemInstruction: {
-                    parts: [{ text: systemPrompt }]
-                },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            name: { type: "STRING" },
-                            gender: { type: "STRING", enum: ["M", "W"] },
-                            hp: { type: "INTEGER" },
-                            stamina: { type: "INTEGER" },
-                            oxygen: { type: "INTEGER" },
-                            food: { type: "INTEGER" },
-                            weight: { type: "INTEGER" },
-                            melee: { type: "INTEGER" },
-                            level: { type: "INTEGER" }
-                        },
-                        required: ["hp", "stamina", "oxygen", "food", "weight", "melee", "level"]
-                    }
-                }
-            };
-
-            let delay = 1000;
-            let success = false;
-            let resultText = '';
-
-            for (let attempt = 1; attempt <= 4; attempt++) {
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.ok) {
-                        const responseJson = await response.json();
-                        const candidate = responseJson.candidates?.[0];
-                        resultText = candidate?.content?.parts?.[0]?.text;
-                        if (resultText) {
-                            success = true;
-                            break;
-                        }
-                    } else if (response.status === 429) {
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2;
-                    } else {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                } catch (err) {
-                    if (attempt === 4) {
-                        document.getElementById('scan-loading-overlay').classList.add('hidden');
-                        showToast("Scannen mit Gemini 3 fehlgeschlagen. Kontrolliere deinen API-Key oder die Verbindung.", "error");
-                        return;
-                    }
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                }
+            const btn = document.getElementById(`gender_btn_${dinoId}`);
+            if (btn) {
+                btn.innerHTML = dino.gender === 'M' ? '♂' : '♀';
+                btn.className = dino.gender === 'M' 
+                    ? 'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition bg-sky-100 text-sky-700 hover:bg-sky-200'
+                    : 'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition bg-pink-100 text-pink-700 hover:bg-pink-200';
             }
-
-            document.getElementById('scan-loading-overlay').classList.add('hidden');
-
-            if (success) {
-                try {
-                    const statsObj = JSON.parse(resultText);
-                    openScanReviewModal(statsObj, lineId, previewSrc);
-                } catch(e) {
-                    showToast("Fehler beim Parsen der Gemini-Antwort.", "error");
-                }
-            } else {
-                showToast("Es konnte kein valides Ergebnis bezogen werden.", "error");
-            }
+            updateSmartVisuals(lineId);
         }
 
-        function openScanReviewModal(stats, lineId, previewSrc) {
-            document.getElementById('scan-preview-img').src = previewSrc;
-            document.getElementById('scan-review-target-line').value = lineId;
+        function handleNameInput(lineId, dinoId, val) {
+            const dino = appState.lines.find(l => l.id === lineId).dinos.find(d => d.id === dinoId);
+            dino.name = val.trim();
+            saveState();
+            updateSuggestionsDOM(lineId);
+        }
 
-            document.getElementById('scan-review-name').value = stats.name || 'Gescannter Dino';
-            setScanReviewGender(stats.gender || 'M');
-
-            document.getElementById('scan-review-hp').value = stats.hp || 0;
-            document.getElementById('scan-review-stamina').value = stats.stamina || 0;
-            document.getElementById('scan-review-oxygen').value = stats.oxygen || 0;
-            document.getElementById('scan-review-food').value = stats.food || 0;
-            document.getElementById('scan-review-weight').value = stats.weight || 0;
-            document.getElementById('scan-review-melee').value = stats.melee || 0;
-
+        function handleStatInput(lineId, dinoId, stat, val) {
+            const numVal = parseInt(val) || 0;
             const line = appState.lines.find(l => l.id === lineId);
-            if (line) {
-                BREEDING_STATS.forEach(stat => {
-                    let currentTop = 0;
-                    if (line.dinos.length > 0) {
-                        currentTop = Math.max(...line.dinos.map(d => d[stat] || 0));
-                    }
-                    const topEl = document.getElementById(`scan-review-${stat}-top-val`);
-                    if (topEl) topEl.textContent = currentTop;
-                });
-            }
+            const dino = line.dinos.find(d => d.id === dinoId);
+            dino[stat] = numVal;
+            saveState();
 
-            validateScanReviewStats();
-            openModal('modal-scan-review');
+            let totalStats = 0;
+            STAT_KEYS.forEach(k => totalStats += (dino[k] || 0));
+            const lvlInput = document.getElementById(`lvl_${dinoId}`);
+            if (lvlInput) lvlInput.value = totalStats + 1;
+
+            updateSmartVisuals(lineId);
         }
 
-        function setScanReviewGender(gender) {
-            document.getElementById('scan-review-gender-val').value = gender;
-            const btnM = document.getElementById('scan-review-gender-m');
-            const btnW = document.getElementById('scan-review-gender-w');
-
-            if (gender === 'M') {
-                btnM.className = "flex-1 py-1 rounded text-[10px] font-bold border transition bg-sky-100 text-sky-800 border-sky-300";
-                btnW.className = "flex-1 py-1 rounded text-[10px] font-bold border transition bg-stone-50 text-stone-500 border-stone-200";
-            } else {
-                btnM.className = "flex-1 py-1 rounded text-[10px] font-bold border transition bg-stone-50 text-stone-500 border-stone-200";
-                btnW.className = "flex-1 py-1 rounded text-[10px] font-bold border transition bg-pink-100 text-pink-800 border-pink-300";
-            }
-        }
-
-        function validateScanReviewStats() {
-            const lineId = document.getElementById('scan-review-target-line').value;
+        function updateSmartVisuals(lineId) {
             const line = appState.lines.find(l => l.id === lineId);
             if (!line) return;
 
-            let newRecordsCount = 0;
-            let matchingTopsCount = 0;
-            let sumStats = 0;
+            const maxStats = {};
+            STAT_KEYS.forEach(stat => {
+                maxStats[stat] = line.dinos.length ? Math.max(...line.dinos.map(d => d[stat] || 0)) : 0;
+                const topLabel = document.getElementById(`top_lbl_${lineId}_${stat}`);
+                if (topLabel) topLabel.textContent = maxStats[stat];
+            });
 
-            BREEDING_STATS.forEach(stat => {
-                const inputEl = document.getElementById(`scan-review-${stat}`);
-                const badgeEl = document.getElementById(`scan-review-${stat}-badge`);
-                const val = parseInt(inputEl.value) || 0;
-                sumStats += val;
+            let sumMax = 0;
+            STAT_KEYS.forEach(s => sumMax += maxStats[s]);
+            const topLvlLabel = document.getElementById(`top_lbl_${lineId}_level`);
+            if (topLvlLabel) topLvlLabel.textContent = line.dinos.length ? (sumMax + 1) : 0;
 
-                let currentTop = 0;
-                if (line.dinos.length > 0) {
-                    currentTop = Math.max(...line.dinos.map(d => d[stat] || 0));
-                }
+            line.dinos.forEach(dino => {
+                let hasTop = false;
+                
+                STAT_KEYS.forEach(stat => {
+                    const inputEl = document.getElementById(`stat_${dino.id}_${stat}`);
+                    if (!inputEl) return;
+                    
+                    const isMax = (dino[stat] === maxStats[stat] && maxStats[stat] > 0);
+                    if (isMax) hasTop = true;
 
-                if (val > currentTop) {
-                    newRecordsCount++;
-                    inputEl.className = "w-full text-center bg-orange-50 border border-orange-400 rounded py-0.5 text-xs font-mono font-bold text-orange-900";
-                    badgeEl.className = "absolute -top-1 -right-1 text-[7px] font-black px-1 rounded shadow-sm bg-orange-500 text-white animate-bounce";
-                    badgeEl.textContent = "🔥 REKORD";
-                    badgeEl.classList.remove('hidden');
-                } else if (val === currentTop && currentTop > 0) {
-                    matchingTopsCount++;
-                    inputEl.className = "w-full text-center bg-emerald-50 border border-emerald-400 rounded py-0.5 text-xs font-mono font-bold text-emerald-900";
-                    badgeEl.className = "absolute -top-1 -right-1 text-[7px] font-black px-1 rounded shadow-sm bg-emerald-500 text-white";
-                    badgeEl.textContent = "⭐ TOP";
-                    badgeEl.classList.remove('hidden');
+                    if (isMax && !dino.isTrash) {
+                        inputEl.className = "w-full text-center bg-orange-100/50 border border-orange-300 text-orange-900 font-extrabold py-1.5 rounded-lg text-xs font-mono transition outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white";
+                    } else {
+                        inputEl.className = "w-full text-center bg-white border border-stone-200 text-stone-600 font-medium py-1.5 rounded-lg text-xs font-mono transition outline-none focus:ring-2 focus:ring-ark-accent focus:border-transparent";
+                    }
+                });
+
+                dino.isTrash = !hasTop && line.dinos.length > 0;
+                
+                const trashInd = document.getElementById(`trash_ind_${dino.id}`);
+                const colGroup = document.querySelectorAll(`.col_grp_${dino.id}`);
+                
+                if (dino.isTrash) {
+                    if (trashInd) trashInd.classList.remove('hidden');
+                    colGroup.forEach(el => el.classList.add('opacity-40', 'bg-red-50/30'));
                 } else {
-                    inputEl.className = "w-full text-center bg-white border border-stone-300 rounded py-0.5 text-xs font-mono font-bold text-stone-700";
-                    badgeEl.classList.add('hidden');
+                    if (trashInd) trashInd.classList.add('hidden');
+                    colGroup.forEach(el => el.classList.remove('opacity-40', 'bg-red-50/30'));
                 }
             });
 
-            document.getElementById('scan-review-level').value = sumStats + 1;
-
-            const verdictEl = document.getElementById('scan-review-verdict');
-            if (newRecordsCount > 0) {
-                verdictEl.className = "p-2 rounded text-center text-xs font-black uppercase tracking-wider bg-orange-100 text-orange-800 border border-orange-200";
-                verdictEl.innerHTML = `🔥 EXZELLENT: Bricht ${newRecordsCount} Rekord(e) in dieser Linie!`;
-            } else if (matchingTopsCount > 0) {
-                verdictEl.className = "p-2 rounded text-center text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200";
-                verdictEl.innerHTML = `⭐ SEHR GUT: Sichert ${matchingTopsCount} bestehende(n) Spitzenwert(e)!`;
-            } else {
-                verdictEl.className = "p-2 rounded text-center text-xs font-black uppercase tracking-wider bg-red-50 text-red-700 border border-red-100";
-                verdictEl.innerHTML = `❌ AUSSCHUSS: Besitzt keinen einzigen Spitzenwert für diese Linie.`;
-            }
-        }
-
-        function saveScanReviewResult() {
-            const lineId = document.getElementById('scan-review-target-line').value;
-            const line = appState.lines.find(l => l.id === lineId);
-            if (!line) return;
-
-            const name = document.getElementById('scan-review-name').value.trim() || 'Scanned Dino';
-            const gender = document.getElementById('scan-review-gender-val').value;
-            const hp = parseInt(document.getElementById('scan-review-hp').value) || 0;
-            const stamina = parseInt(document.getElementById('scan-review-stamina').value) || 0;
-            const oxygen = parseInt(document.getElementById('scan-review-oxygen').value) || 0;
-            const food = parseInt(document.getElementById('scan-review-food').value) || 0;
-            const weight = parseInt(document.getElementById('scan-review-weight').value) || 0;
-            const melee = parseInt(document.getElementById('scan-review-melee').value) || 0;
-            const level = parseInt(document.getElementById('scan-review-level').value) || 1;
-
-            const newDino = {
-                id: 'dino_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                name,
-                gender,
-                hp,
-                stamina,
-                oxygen,
-                food,
-                weight,
-                melee,
-                level,
-                isTrash: false
-            };
-
-            line.dinos.push(newDino);
-            saveToLocalStorage();
-            closeModal('modal-scan-review');
-            renderAllLines();
-            showToast(`Dino "${name}" erfolgreich eingelesen und hinzugefügt!`);
+            updateSuggestionsDOM(lineId);
         }
 
         function renderAllLines() {
@@ -1047,210 +577,130 @@
             }
 
             appState.lines.forEach(line => {
-                const lineSection = document.createElement('div');
-                lineSection.className = "bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden p-4 space-y-4 animate-fade-in";
-                
                 const maxStats = {};
-                BREEDING_STATS.forEach(stat => {
-                    if (line.dinos.length > 0) {
-                        maxStats[stat] = Math.max(...line.dinos.map(d => d[stat] || 0));
-                    } else {
-                        maxStats[stat] = 0;
-                    }
+                let hasAnyData = line.dinos.length > 0;
+                STAT_KEYS.forEach(stat => { maxStats[stat] = hasAnyData ? Math.max(...line.dinos.map(d => d[stat] || 0)) : 0; });
+                let sumMax = 0; STAT_KEYS.forEach(s => sumMax += maxStats[s]);
+                const topLevel = hasAnyData ? (sumMax + 1) : 0;
+
+                line.dinos.forEach(d => {
+                    let hasTop = false;
+                    STAT_KEYS.forEach(s => { if(d[s] === maxStats[s] && maxStats[s] > 0) hasTop = true; });
+                    d.isTrash = !hasTop && hasAnyData;
                 });
                 
-                let sumOfTops = 0;
-                BREEDING_STATS.forEach(stat => {
-                    sumOfTops += (maxStats[stat] || 0);
-                });
-                maxStats['level'] = line.dinos.length > 0 ? (sumOfTops + 1) : 0;
-
-                line.dinos.forEach(dino => {
-                    let hasAtLeastOneTop = false;
-                    BREEDING_STATS.forEach(stat => {
-                        if (dino[stat] === maxStats[stat] && maxStats[stat] > 0) {
-                            hasAtLeastOneTop = true;
-                        }
-                    });
-                    dino.isTrash = !hasAtLeastOneTop;
-                });
-
-                const productiveDinos = line.dinos.filter(d => !d.isTrash);
+                const activeDinos = line.dinos.filter(d => !d.isTrash);
                 const trashDinos = line.dinos.filter(d => d.isTrash);
+                const cols = [...activeDinos, { isPlus: true }, ...trashDinos];
 
-                const renderColumns = [];
-                productiveDinos.forEach(d => {
-                    renderColumns.push({ type: 'dino', data: d });
-                });
-
-                renderColumns.push({ type: 'plus', data: null });
-
-                trashDinos.forEach(d => {
-                    renderColumns.push({ type: 'dino', data: d });
-                });
-
-                let thsHTML = '';
-                renderColumns.forEach(col => {
-                    if (col.type === 'plus') {
-                        thsHTML += `
-                            <th class="p-2 border-b border-stone-200 w-16 text-center align-middle bg-stone-50/50">
-                                <div class="flex flex-col items-center justify-center">
-                                    <button onclick="addDinoInline('${line.id}')" class="w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold flex items-center justify-center shadow-sm transition active:scale-90" title="Dino hier hinzufügen">+</button>
-                                    <span class="text-[7px] text-stone-400 font-bold uppercase mt-1">Hinzufügen</span>
-                                </div>
-                            </th>
-                        `;
+                let thHtml = '';
+                cols.forEach(col => {
+                    if (col.isPlus) {
+                        thHtml += `
+                            <th class="p-2 border-b border-stone-200 align-bottom w-12 bg-stone-50/50">
+                                <button onclick="addDino('${line.id}')" class="w-8 h-8 mx-auto bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-sm transform active:scale-90 transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                                </button>
+                            </th>`;
                     } else {
-                        const dino = col.data;
-                        const genderSymbol = dino.gender === 'M' ? '♂' : '♀';
-                        const genderColor = dino.gender === 'M' ? 'bg-sky-100 hover:bg-sky-200 text-sky-800 border-sky-300' : 'bg-pink-100 hover:bg-pink-200 text-pink-800 border-pink-300';
-                        const colBg = dino.isTrash ? 'bg-red-50/30' : 'bg-white';
-                        const trashIndicator = dino.isTrash ? '<span class="text-red-600 text-[8px] font-black block tracking-tighter mb-1">🗑️ AUSSCHUSS</span>' : '';
-
-                        thsHTML += `
-                            <th class="p-2 text-center border-b border-stone-200 min-w-[125px] max-w-[150px] relative ${colBg}">
-                                <div class="flex flex-col gap-1 items-center">
-                                    <div class="flex items-center justify-between w-full px-1">
-                                        <button onclick="toggleDinoGender('${line.id}', '${dino.id}')" class="${genderColor} text-[11px] font-bold px-2 py-0.5 rounded-full border transition" title="Klicken für Geschlechts-Wechsel">
-                                            ${genderSymbol}
-                                        </button>
-                                        ${trashIndicator}
-                                        <button onclick="deleteDinoInline('${line.id}', '${dino.id}')" class="text-stone-300 hover:text-red-600 font-extrabold text-sm transition px-1" title="Dino löschen">
-                                            &times;
-                                        </button>
+                        const d = col;
+                        const bgCol = d.isTrash ? 'bg-red-50/30 opacity-40' : 'bg-white';
+                        const gBtnClass = d.gender === 'M' ? 'bg-sky-100 text-sky-700 hover:bg-sky-200' : 'bg-pink-100 text-pink-700 hover:bg-pink-200';
+                        const gIcon = d.gender === 'M' ? '♂' : '♀';
+                        
+                        thHtml += `
+                            <th class="p-2 border-b border-stone-200 min-w-[130px] col_grp_${d.id} ${bgCol} transition-all duration-300">
+                                <div class="flex flex-col gap-2">
+                                    <div class="flex justify-between items-center px-1">
+                                        <button id="gender_btn_${d.id}" onclick="toggleGender('${line.id}', '${d.id}')" class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition ${gBtnClass}">${gIcon}</button>
+                                        <span id="trash_ind_${d.id}" class="text-[9px] font-black tracking-tight text-red-500 bg-red-100 px-1.5 py-0.5 rounded ${d.isTrash ? '' : 'hidden'}">🗑️ ALT</span>
+                                        <button onclick="removeDino('${line.id}', '${d.id}')" class="text-stone-300 hover:text-red-500 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                     </div>
-                                    <input type="text" id="name-input-${dino.id}" value="${dino.name}" 
-                                        oninput="updateDinoTextInline('${line.id}', '${dino.id}', 'name', this.value)" 
-                                        onblur="onInlineInputBlur()"
-                                        onfocus="this.select()"
-                                        placeholder="Name..."
-                                        class="w-full bg-transparent text-stone-900 text-xs font-bold text-center border-b border-stone-200 focus:border-ark-accent focus:outline-none py-0.5">
+                                    <input type="text" id="name_${d.id}" value="${d.name}" oninput="handleNameInput('${line.id}', '${d.id}', this.value)" placeholder="Name..." class="w-full bg-transparent text-sm font-bold text-center border-b-2 border-transparent focus:border-ark-accent outline-none pb-0.5 transition text-stone-800">
                                 </div>
-                            </th>
-                        `;
+                            </th>`;
                     }
                 });
 
-                let rowsHTML = '';
-                STAT_KEYS.forEach(stat => {
-                    let tdsHTML = '';
+                let rowsHtml = '';
+                [...STAT_KEYS, 'level'].forEach(stat => {
+                    const isLvl = stat === 'level';
+                    const topVal = isLvl ? topLevel : maxStats[stat];
                     
-                    renderColumns.forEach(col => {
-                        if (col.type === 'plus') {
-                            tdsHTML += `<td class="p-1 border-b border-stone-100 bg-stone-50/20 text-center text-stone-300 font-bold">|</td>`;
+                    let tdHtml = '';
+                    cols.forEach(col => {
+                        if (col.isPlus) {
+                            tdHtml += `<td class="p-1 border-b border-stone-100 bg-stone-50/30"><div class="w-px h-4 bg-stone-200 mx-auto"></div></td>`;
                         } else {
-                            const dino = col.data;
-                            const value = dino[stat] || 0;
-                            const isMax = !dino.isTrash && value === maxStats[stat] && maxStats[stat] > 0;
+                            const d = col;
+                            const bgCol = d.isTrash ? 'bg-red-50/30 opacity-40' : '';
                             
-                            const isLevelRow = stat === 'level';
-                            const inputStyle = isMax 
-                                ? 'bg-orange-100/70 border border-orange-300 text-orange-800 font-extrabold' 
-                                : 'bg-transparent border border-transparent text-stone-600';
-                            
-                            const trashOpacity = dino.isTrash ? 'opacity-50' : '';
-
-                            if (isLevelRow) {
-                                tdsHTML += `
-                                    <td class="p-1 text-center border-b border-stone-100 ${trashOpacity}">
-                                        <input type="number" id="level-display-${dino.id}" value="${value}" disabled readonly
-                                            class="w-16 bg-stone-100/70 rounded text-center text-stone-700 font-mono text-xs font-bold py-1 select-all pointer-events-none">
-                                    </td>
-                                `;
+                            if (isLvl) {
+                                let t = 0; STAT_KEYS.forEach(k => t+=(d[k]||0));
+                                tdHtml += `<td class="p-1.5 border-b border-stone-100 col_grp_${d.id} ${bgCol}"><input disabled id="lvl_${d.id}" value="${t+1}" class="w-full text-center bg-stone-100 text-stone-500 font-bold py-1.5 rounded-lg text-xs font-mono"></td>`;
                             } else {
-                                tdsHTML += `
-                                    <td class="p-1 text-center border-b border-stone-100 ${trashOpacity}">
-                                        <input type="number" pattern="[0-9]*" value="${value}" 
-                                            oninput="updateDinoStatInline('${line.id}', '${dino.id}', '${stat}', this.value)" 
-                                            onblur="onInlineInputBlur()"
-                                            onfocus="this.select()"
-                                            class="w-14 rounded text-center font-mono text-xs py-1 transition focus:bg-stone-100 focus:outline-none focus:ring-1 focus:ring-ark-accent ${inputStyle}">
-                                    </td>
-                                `;
+                                const isMax = (!d.isTrash && d[stat] === topVal && topVal > 0);
+                                const inputClass = isMax 
+                                    ? "w-full text-center bg-orange-100/50 border border-orange-300 text-orange-900 font-extrabold py-1.5 rounded-lg text-xs font-mono transition outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white"
+                                    : "w-full text-center bg-white border border-stone-200 text-stone-600 font-medium py-1.5 rounded-lg text-xs font-mono transition outline-none focus:ring-2 focus:ring-ark-accent focus:border-transparent";
+                                
+                                tdHtml += `<td class="p-1.5 border-b border-stone-100 col_grp_${d.id} ${bgCol}">
+                                    <input type="number" id="stat_${d.id}_${stat}" value="${d[stat]||0}" oninput="handleStatInput('${line.id}', '${d.id}', '${stat}', this.value)" onfocus="this.select()" class="${inputClass}">
+                                </td>`;
                             }
                         }
                     });
 
-                    rowsHTML += `
-                        <tr class="hover:bg-stone-50/50 transition">
-                            <td class="p-2 border-r border-stone-200 sticky-col">
-                                <div class="flex flex-col items-start leading-none py-0.5">
-                                    <span class="text-[10px] font-bold text-stone-500 uppercase tracking-tight">${STAT_LABELS[stat]}</span>
-                                    <span class="text-[11px] text-stone-950 font-black tracking-tight mt-0.5">top: ${maxStats[stat] || 0}</span>
+                    const statLabel = isLvl ? 'Level' : STAT_LABELS[stat];
+                    rowsHtml += `
+                        <tr class="hover:bg-stone-50/50 transition-colors group">
+                            <td class="p-2 border-r border-stone-200 sticky-col bg-white">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] font-bold text-stone-400 uppercase tracking-widest">${statLabel}</span>
+                                    <span class="text-xs font-black text-stone-800 font-mono tracking-tight mt-0.5" id="top_lbl_${line.id}_${stat}">${topVal}</span>
                                 </div>
                             </td>
-                            ${tdsHTML}
-                        </tr>
-                    `;
+                            ${tdHtml}
+                        </tr>`;
                 });
 
-                const suggestionsHTML = calculateGenderIndependentSuggestions(line, maxStats);
-
-                lineSection.innerHTML = `
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-2 border-b border-stone-100">
-                        <div>
-                            <span class="text-[9px] bg-orange-100 text-orange-800 font-extrabold px-1.5 py-0.5 rounded-md tech-font">ACTIVE PROJECT</span>
-                            <h3 class="text-sm font-bold text-stone-900 flex items-center gap-1.5 mt-0.5">
-                                🧬 ${line.name}
-                            </h3>
-                        </div>
-                        <div class="flex gap-1 w-full sm:w-auto justify-end">
-                            <label class="bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900 text-[10px] font-bold py-1.5 px-2.5 rounded flex items-center gap-1 cursor-pointer transition" title="Foto scannen">
+                const section = document.createElement('div');
+                section.className = "bg-white rounded-2xl border border-ark-border shadow-soft overflow-hidden";
+                section.innerHTML = `
+                    <div class="p-4 border-b border-stone-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-stone-50/50">
+                        <h3 class="text-base font-extrabold text-stone-900 flex items-center gap-2">
+                            <span class="bg-orange-100 text-orange-600 p-1.5 rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg></span>
+                            ${line.name}
+                        </h3>
+                        <div class="flex gap-1.5 w-full md:w-auto overflow-x-auto no-scrollbar pb-1 md:pb-0">
+                            <label class="shrink-0 bg-stone-100 hover:bg-stone-200 text-stone-700 text-[10px] font-bold py-1.5 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer transition">
                                 <span>📸 Scannen</span>
-                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="triggerImageScan(event, '${line.id}')">
+                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="startGeminiScan(event, '${line.id}')">
                             </label>
-                            <button onclick="addDinoInline('${line.id}')" class="bg-orange-600 hover:bg-orange-700 text-white text-[10px] font-bold py-1.5 px-2.5 rounded flex items-center gap-1 transition">
-                                <span>+ Dino</span>
-                            </button>
-                            <button onclick="transferLineToBestandPrompt('${line.id}')" class="bg-stone-800 hover:bg-stone-700 text-white text-[10px] font-bold py-1.5 px-2.5 rounded flex items-center gap-1 transition" title="Top-Werte in Bestand sichern">
-                                <span>💾 Sichern</span>
-                            </button>
-                            <button onclick="deleteSpecificLine('${line.id}')" class="text-stone-400 hover:text-red-600 transition p-1.5" title="Linie löschen">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
+                            <button onclick="saveToBestand('${line.id}')" class="shrink-0 bg-stone-900 hover:bg-stone-800 text-white text-[10px] font-bold py-1.5 px-3 rounded-lg flex items-center gap-1.5 transition">💾 Archivieren</button>
+                            <button onclick="deleteLine('${line.id}')" class="shrink-0 text-stone-400 hover:bg-red-50 hover:text-red-600 px-2 rounded-lg transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                        <div class="lg:col-span-3 border border-stone-200 rounded-lg overflow-hidden flex flex-col bg-stone-50/30 table-container">
-                            <div class="overflow-x-auto w-full no-scrollbar">
-                                <table class="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr class="bg-stone-100/60 border-b border-stone-200">
-                                            <th class="p-2 text-[10px] uppercase tracking-wider text-stone-500 font-bold sticky-col border-r border-stone-200 min-w-[100px] text-center">Wert / Stat</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-stone-100 text-xs">
-                                        <tr class="bg-stone-50/20">
-                                            <td class="sticky-col border-r border-stone-200 bg-stone-100/30"></td>
-                                            ${thsHTML}
-                                        </tr>
-                                        ${rowsHTML}
-                                    </tbody>
+                    
+                    <div class="grid grid-cols-1 xl:grid-cols-4">
+                        <div class="xl:col-span-3 border-r border-stone-100 table-container">
+                            <div class="overflow-x-auto w-full no-scrollbar relative">
+                                <table class="w-full text-left border-collapse min-w-max">
+                                    <thead><tr class="bg-stone-50/30"><th class="sticky-col sticky-header bg-white border-r border-b border-stone-200 w-[70px]"></th>${thHtml}</tr></thead>
+                                    <tbody class="divide-y divide-stone-100 bg-white">${rowsHtml}</tbody>
                                 </table>
                             </div>
-                            ${line.dinos.length === 0 ? `
-                                <div class="p-6 text-center text-stone-400 text-xs">
-                                    Keine Dinos vorhanden. Nutze "+ Dino" oder "📸 Scannen" für dieses Projekt.
-                                </div>
-                            ` : ''}
                         </div>
-
-                        <div class="space-y-3">
-                            <div class="bg-amber-50/40 border border-amber-100/80 p-3 rounded-lg">
-                                <div class="flex items-center gap-1 border-b border-amber-200/50 pb-1 mb-2">
-                                    <span class="text-xs">🧬</span>
-                                    <h4 class="text-[10px] font-bold text-stone-800 uppercase tracking-wider">Paarungs-Vorschläge</h4>
-                                </div>
-                                <div class="space-y-1.5">
-                                    ${suggestionsHTML}
-                                </div>
-                            </div>
+                        
+                        <!-- Suggestions Container (Updated Dynamically) -->
+                        <div class="bg-stone-50 p-4" id="sugg_container_${line.id}">
+                            <!-- Content generated by updateSuggestionsDOM -->
                         </div>
                     </div>
                 `;
+                container.appendChild(section);
                 
-                container.appendChild(lineSection);
+                updateSuggestionsDOM(line.id);
             });
 
             // "Neues Projekt" Button am Ende der Liste einfügen
@@ -1265,45 +715,37 @@
             container.appendChild(addLineCard);
         }
 
-        function calculateGenderIndependentSuggestions(line, maxStats) {
-            const activePool = line.dinos.filter(d => !d.isTrash);
+        function updateSuggestionsDOM(lineId) {
+            const container = document.getElementById(`sugg_container_${lineId}`);
+            if (!container) return;
+            
+            const line = appState.lines.find(l => l.id === lineId);
+            if (!line) return;
 
-            if (activePool.length < 2) {
-                return `<p class="text-[9px] text-stone-500 italic">Trage mindestens 2 aktive Dinos mit unterschiedlichen Top-Werten ein.</p>`;
+            const active = line.dinos.filter(d => !d.isTrash);
+            
+            const maxStats = {};
+            STAT_KEYS.forEach(s => maxStats[s] = active.length ? Math.max(...active.map(d => d[s] || 0)) : 0);
+
+            let html = `<div class="flex items-center gap-2 mb-3"><div class="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div><h4 class="text-xs font-bold text-stone-800 uppercase tracking-wide">Paarungs-KI</h4></div>`;
+
+            if (active.length < 2) {
+                html += `<div class="bg-white border border-stone-200 rounded-xl p-3 text-[10px] text-stone-500 text-center shadow-sm">Mindestens 2 aktive Dinos benötigt.</div>`;
+                container.innerHTML = html;
+                return;
             }
 
-            const getBestStatsOfDino = (dino) => {
-                const bests = [];
-                BREEDING_STATS.forEach(stat => {
-                    if (dino[stat] === maxStats[stat] && maxStats[stat] > 0) {
-                        bests.push(stat);
-                    }
-                });
-                return bests;
-            };
-
+            const getBests = (d) => STAT_KEYS.filter(s => d[s] === maxStats[s] && maxStats[s] > 0);
             const pairs = [];
 
-            for (let i = 0; i < activePool.length; i++) {
-                for (let j = i + 1; j < activePool.length; j++) {
-                    const d1 = activePool[i];
-                    const d2 = activePool[j];
+            for (let i = 0; i < active.length; i++) {
+                for (let j = i + 1; j < active.length; j++) {
+                    const d1 = active[i], d2 = active[j];
+                    const b1 = getBests(d1), b2 = getBests(d2);
+                    const combined = [...new Set([...b1, ...b2])];
 
-                    const d1Bests = getBestStatsOfDino(d1);
-                    const d2Bests = getBestStatsOfDino(d2);
-
-                    const combinedBests = Array.from(new Set([...d1Bests, ...d2Bests]));
-
-                    if (combinedBests.length > d1Bests.length && combinedBests.length > d2Bests.length) {
-                        let score = combinedBests.length * 10;
-                        pairs.push({
-                            d1,
-                            d2,
-                            d1Bests,
-                            d2Bests,
-                            combinedBests,
-                            score
-                        });
+                    if (combined.length > b1.length && combined.length > b2.length) {
+                        pairs.push({ d1, d2, b1, b2, combined, score: combined.length });
                     }
                 }
             }
@@ -1312,316 +754,360 @@
             const topPairs = pairs.slice(0, 2);
 
             if (topPairs.length === 0) {
-                return `<p class="text-[9px] text-emerald-700 bg-emerald-50 border border-emerald-100 p-2 rounded italic text-center font-medium">Keine produktiven Paarungen nötig. Die aktuellen Spitzenwerte sind bereits perfekt konsolidiert!</p>`;
+                html += `<div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-[10px] text-emerald-700 font-bold text-center shadow-sm">Werte sind optimal vereint!</div>`;
+            } else {
+                html += `<div class="space-y-2">`;
+                topPairs.forEach((p, idx) => {
+                    const warn = p.d1.gender === p.d2.gender ? `<span class="bg-red-100 text-red-600 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ml-2">Gleiches Geschlecht!</span>` : '';
+                    
+                    html += `
+                        <div class="bg-white rounded-xl border border-stone-200 p-3 shadow-sm hover:shadow transition">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="text-[9px] font-extrabold text-stone-400 uppercase tracking-wider">Option ${idx+1}</span>
+                                <span class="text-[9px] font-black bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded font-mono">${p.combined.length}/${STAT_KEYS.length} Werten</span>
+                            </div>
+                            <div class="space-y-1 mb-2">
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="font-bold truncate max-w-[80px] ${p.d1.gender==='M'?'text-sky-600':'text-pink-600'}">${p.d1.name}</span>
+                                    <span class="text-[8px] font-mono text-stone-400">${p.b1.map(s=>STAT_LABELS[s].substring(0,3)).join(', ')}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="font-bold truncate max-w-[80px] ${p.d2.gender==='M'?'text-sky-600':'text-pink-600'}">${p.d2.name}</span>
+                                    <span class="text-[8px] font-mono text-stone-400">${p.b2.map(s=>STAT_LABELS[s].substring(0,3)).join(', ')}</span>
+                                </div>
+                            </div>
+                            <div class="bg-stone-50 rounded-lg p-1.5 border border-stone-100">
+                                <span class="block text-[8px] text-stone-500 font-bold mb-0.5 uppercase">Ergebnis-Pool: ${warn}</span>
+                                <span class="text-[9px] font-bold text-ark-accent font-mono">${p.combined.map(s=>STAT_LABELS[s]).join(', ')}</span>
+                            </div>
+                        </div>`;
+                });
+                html += `</div>`;
             }
-
-            let html = '';
-            topPairs.forEach((pair, idx) => {
-                const d1GenderColor = pair.d1.gender === 'M' ? 'text-sky-600' : 'text-pink-600';
-                const d2GenderColor = pair.d2.gender === 'M' ? 'text-sky-600' : 'text-pink-600';
-                const d1Symbol = pair.d1.gender === 'M' ? '♂' : '♀';
-                const d2Symbol = pair.d2.gender === 'M' ? '♂' : '♀';
-                
-                const sameGender = pair.d1.gender === pair.d2.gender;
-                const genderWarningHTML = sameGender 
-                    ? `<div class="mt-1 text-[7px] bg-amber-100 text-amber-800 rounded px-1 py-0.5 inline-block font-bold">⚠️ GLEICHES GESCHLECHT (${d1Symbol})</div>`
-                    : '';
-
-                const progressPct = Math.round((pair.combinedBests.length / BREEDING_STATS.length) * 100);
-
-                html += `
-                    <div class="bg-white p-2 rounded-lg border border-stone-200 text-[10px] space-y-1">
-                        <div class="flex justify-between items-center border-b border-stone-100 pb-0.5">
-                            <span class="font-extrabold text-orange-600 text-[8px] uppercase">Option #${idx + 1}</span>
-                            <span class="text-[8px] bg-emerald-50 text-emerald-700 px-1 py-0.5 rounded-md font-bold tech-font">${progressPct}% Kombination</span>
-                        </div>
-                        <div class="space-y-0.5 font-semibold text-[9px]">
-                            <div class="flex justify-between">
-                                <span class="truncate max-w-[70px] ${d1GenderColor}">d1: ${pair.d1.name} (${d1Symbol})</span>
-                                <span class="text-[8px] text-stone-400 font-mono">${pair.d1Bests.map(s => s.toUpperCase()).join(', ') || 'Keine Tops'}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="truncate max-w-[70px] ${d2GenderColor}">d2: ${pair.d2.name} (${d2Symbol})</span>
-                                <span class="text-[8px] text-stone-400 font-mono">${pair.d2Bests.map(s => s.toUpperCase()).join(', ') || 'Keine Tops'}</span>
-                            </div>
-                        </div>
-                        ${genderWarningHTML}
-                        <div class="bg-stone-50 p-1 rounded text-[8px] text-stone-500 leading-tight">
-                            <span class="font-bold text-stone-700 block">Kombinierte Spitzenwerte:</span>
-                            <span class="text-emerald-600 font-semibold">${pair.combinedBests.map(s => STAT_LABELS[s]).join(', ')}</span>
-                        </div>
-                    </div>
-                `;
-            });
-
-            return html;
+            container.innerHTML = html;
         }
 
-        function transferLineToBestandPrompt(lineId) {
-            const targetLine = appState.lines.find(l => l.id === lineId);
-            if (!targetLine || !targetLine.dinos || targetLine.dinos.length === 0) {
-                showToast("Keine Dinos im Zuchtprojekt vorhanden!", "error");
-                return;
-            }
+        function saveToBestand(lineId) {
+            const line = appState.lines.find(l => l.id === lineId);
+            const active = line.dinos.filter(d => !d.isTrash);
+            if (active.length === 0) return showToast('Keine aktiven Dinos vorhanden', 'error');
 
-            const activePool = targetLine.dinos.filter(d => !d.isTrash);
-            if (activePool.length === 0) {
-                showToast("Keine aktiven Dinos (ohne Ausschuss) vorhanden!", "error");
-                return;
-            }
+            const tops = {};
+            STAT_KEYS.forEach(s => tops[s] = Math.max(...active.map(d => d[s] || 0)));
+            let lvl = 0; STAT_KEYS.forEach(s => lvl += tops[s]); tops.level = lvl + 1;
 
-            const maxStats = {};
-            BREEDING_STATS.forEach(stat => {
-                maxStats[stat] = Math.max(...activePool.map(d => d[stat] || 0));
-            });
-            let sum = 0;
-            BREEDING_STATS.forEach(s => sum += maxStats[s]);
-            maxStats['level'] = sum + 1;
+            customPrompt('Bestand sichern', 'Unter welchem Namen soll dieser Meilenstein gespeichert werden?', `${line.name} Master`, (name) => {
+                if (name) {
+                    appState.bestand.unshift({
+                        id: 'b_' + Date.now(),
+                        lineName: line.name,
+                        displayName: name,
+                        date: new Date().toLocaleDateString('de-DE'),
+                        stats: tops
+                    });
+                    saveState();
+                    showToast('Im Bestand archiviert!');
+                    renderBestand();
 
-            customPrompt(
-                "In Bestand archivieren",
-                "Unter welchem Namen soll dieser fertige Spitzen-Stamm im Bestand gesichert werden?",
-                `${targetLine.name} (Archiv)`,
-                function(name) {
-                    if (name !== null) {
-                        const newArchiveItem = {
-                            id: 'bestand_' + Date.now(),
-                            lineName: targetLine.name,
-                            displayName: name || 'Zuchtlinie Snapshot',
-                            date: new Date().toLocaleDateString('de-DE'),
-                            stats: maxStats
-                        };
-
-                        appState.bestand.push(newArchiveItem);
-                        saveToLocalStorage();
-                        showToast(`Archiviert im Bestand!`);
-                        renderBestand();
-
-                        // Neue Nachfrage zum Löschen der aktiven Zuchtlinie
-                        setTimeout(() => {
-                            customConfirm(
-                                'Projekt löschen?',
-                                `Möchtest du das ursprüngliche Projekt "${targetLine.name}" jetzt löschen?`,
-                                (confirmDelete) => {
-                                    if (confirmDelete) {
-                                        deleteSpecificLine(lineId, true);
-                                    }
+                    setTimeout(() => {
+                        customConfirm(
+                            'Projekt löschen?',
+                            `Möchtest du das ursprüngliche Projekt "${line.name}" jetzt löschen?`,
+                            (confirmDelete) => {
+                                if (confirmDelete) {
+                                    deleteLine(lineId, true);
                                 }
-                            );
-                        }, 400);
-                    }
+                            }
+                        );
+                    }, 400); 
                 }
-            );
+            });
         }
 
         function renderBestand() {
             const grid = document.getElementById('bestand-grid');
-            const placeholder = document.getElementById('bestand-placeholder');
+            const ph = document.getElementById('bestand-placeholder');
             grid.innerHTML = '';
 
-            if (!appState.bestand || appState.bestand.length === 0) {
-                placeholder.classList.remove('hidden');
-                grid.classList.add('hidden');
+            if (appState.bestand.length === 0) {
+                ph.classList.remove('hidden');
                 return;
             }
+            ph.classList.add('hidden');
 
-            placeholder.classList.add('hidden');
-            grid.classList.remove('hidden');
+            const SHORT_LABELS = {
+                hp: '🩸',
+                stamina: '⚡',
+                oxygen: '💨',
+                food: '🍖',
+                weight: '⚖️',
+                melee: '💪',
+                level: 'Lvl'
+            };
 
             appState.bestand.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "bg-white border border-stone-200 rounded-xl p-3 shadow-sm relative overflow-hidden flex flex-col justify-between";
-                
-                let statsHTML = '';
-                STAT_KEYS.forEach(stat => {
-                    const value = item.stats[stat] || 0;
-                    statsHTML += `
-                        <div class="bg-stone-50 py-1 rounded border border-stone-100 text-center">
-                            <span class="block text-[8px] uppercase text-stone-400 font-bold">${STAT_LABELS[stat]}</span>
-                            <span class="text-xs font-bold text-orange-600 tech-font">${value}</span>
+                let statsHtml = '';
+                const allKeys = [...STAT_KEYS, 'level'];
+                allKeys.forEach(s => {
+                    const value = item.stats[s] || 0;
+                    const label = SHORT_LABELS[s];
+                    const isLvl = s === 'level';
+                    const textColorClass = isLvl ? 'text-orange-600 font-extrabold' : 'text-stone-700 font-bold';
+                    
+                    statsHtml += `
+                        <div class="text-center py-1 bg-stone-50/50 rounded border border-stone-100/60">
+                            <span class="block text-[11px] leading-none mb-1">${label}</span>
+                            <span class="text-[10px] tech-font leading-none block ${textColorClass}">${value}</span>
                         </div>
                     `;
                 });
 
-                card.innerHTML = `
-                    <div class="flex justify-between items-start pb-1.5 border-b border-stone-100 mb-2">
+                grid.innerHTML += `
+                    <div class="bg-white rounded-2xl border border-ark-border shadow-soft p-4 flex flex-col justify-between">
                         <div>
-                            <span class="text-[8px] text-ark-accent font-extrabold tracking-wider uppercase tech-font">ABGESICHERTE LINIE</span>
-                            <h3 class="text-xs font-bold text-stone-900 leading-tight mt-0.5">${item.displayName}</h3>
-                            <span class="text-[8px] text-stone-400 block mt-0.5">${item.lineName} • ${item.date}</span>
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="text-sm font-extrabold text-stone-900">${item.displayName}</h3>
+                                    <span class="text-[9px] text-stone-400 uppercase tracking-widest font-bold block mt-0.5">${item.lineName} • ${item.date}</span>
+                                </div>
+                                <button onclick="delBestand('${item.id}')" class="text-stone-300 hover:text-red-500 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                            </div>
+                            <div class="grid grid-cols-7 gap-1 my-2 bg-stone-50/20 p-1 rounded-lg border border-stone-100/40">
+                                ${statsHtml}
+                            </div>
                         </div>
-                        <button onclick="deleteBestandItemPrompt('${item.id}')" class="text-stone-400 hover:text-red-600 transition p-1" title="Löschen">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <button onclick="openCopyModal('${item.id}')" class="w-full bg-stone-900 hover:bg-stone-800 text-white text-[10px] font-bold py-2 rounded-xl transition flex justify-center items-center gap-1.5 shadow-sm mt-2">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                            In Projekt laden
                         </button>
-                    </div>
-
-                    <div class="grid grid-cols-4 gap-1.5 my-2">
-                        ${statsHTML}
-                    </div>
-
-                    <div class="flex justify-between items-center gap-1.5 mt-2 pt-2 border-t border-stone-100">
-                        <button onclick="openCopyBestandModal('${item.id}')" class="bg-orange-50 hover:bg-orange-100 border border-orange-200 text-ark-accent text-[9px] font-black py-1 px-2.5 rounded transition uppercase tracking-tight flex items-center gap-1">
-                            <span>🧬 In Linie kopieren</span>
-                        </button>
-                    </div>
-                `;
-                grid.appendChild(card);
+                    </div>`;
             });
         }
 
-        function openCopyBestandModal(bestandId) {
-            const item = appState.bestand.find(b => b.id === bestandId);
-            if (!item) return;
-
-            document.getElementById('copy-bestand-id').value = bestandId;
-            const select = document.getElementById('select-copy-target-line');
-            select.innerHTML = '';
-
-            const newOpt = document.createElement('option');
-            newOpt.value = 'NEW';
-            newOpt.textContent = '➕ Neue Zuchtlinie aus Stamm erstellen';
-            select.appendChild(newOpt);
-
-            appState.lines.forEach(line => {
-                const opt = document.createElement('option');
-                opt.value = line.id;
-                opt.textContent = `🧬 ${line.name}`;
-                select.appendChild(opt);
+        function delBestand(id) {
+            customConfirm('Löschen', 'Archivierten Eintrag entfernen?', (ok) => {
+                if(ok) {
+                    appState.bestand = appState.bestand.filter(b => b.id !== id);
+                    saveState(); renderBestand();
+                }
             });
+        }
 
+        function openCopyModal(id) {
+            document.getElementById('copy-bestand-id').value = id;
+            const sel = document.getElementById('select-copy-target-line');
+            sel.innerHTML = `<option value="NEW">➕ Als neues Projekt anlegen</option>`;
+            appState.lines.forEach(l => sel.innerHTML += `<option value="${l.id}">🧬 ${l.name}</option>`);
             openModal('modal-copy-bestand');
         }
 
         function executeCopyBestandToLine() {
-            const bestandId = document.getElementById('copy-bestand-id').value;
-            const targetLineId = document.getElementById('select-copy-target-line').value;
-
-            const item = appState.bestand.find(b => b.id === bestandId);
-            if (!item) return;
-
+            const bId = document.getElementById('copy-bestand-id').value;
+            const targetId = document.getElementById('select-copy-target-line').value;
+            const item = appState.bestand.find(b => b.id === bId);
+            
             let targetLine;
-            if (targetLineId === 'NEW') {
-                const newLineId = 'line_' + Date.now();
-                targetLine = {
-                    id: newLineId,
-                    name: `${item.displayName} Projekt`,
-                    dinos: []
-                };
-                appState.lines.push(targetLine);
+            if (targetId === 'NEW') {
+                targetLine = { id: 'line_' + Date.now(), name: `${item.displayName} Zucht`, dinos: [] };
+                appState.lines.unshift(targetLine);
             } else {
-                targetLine = appState.lines.find(l => l.id === targetLineId);
+                targetLine = appState.lines.find(l => l.id === targetId);
             }
 
-            if (!targetLine) return;
-
-            let levelSum = 0;
-            BREEDING_STATS.forEach(s => levelSum += (item.stats[s] || 0));
-
-            const newDino = {
-                id: 'dino_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+            let lvl = 0; STAT_KEYS.forEach(s => lvl += item.stats[s]);
+            
+            targetLine.dinos.push({
+                id: 'dino_' + Date.now(),
                 name: `${item.displayName} Stamm`,
                 gender: 'M',
-                hp: item.stats.hp || 0,
-                stamina: item.stats.stamina || 0,
-                oxygen: item.stats.oxygen || 0,
-                food: item.stats.food || 0,
-                weight: item.stats.weight || 0,
-                melee: item.stats.melee || 0,
-                level: levelSum + 1,
+                hp: item.stats.hp, stamina: item.stats.stamina, oxygen: item.stats.oxygen, 
+                food: item.stats.food, weight: item.stats.weight, melee: item.stats.melee,
                 isTrash: false
-            };
+            });
 
-            targetLine.dinos.push(newDino);
-            saveToLocalStorage();
+            saveState();
             closeModal('modal-copy-bestand');
             renderAllLines();
-            showToast(`"${newDino.name}" in Projekt "${targetLine.name}" geladen!`);
             switchTab('tab-breeding');
-        }
-
-        function deleteBestandItemPrompt(id) {
-            customConfirm(
-                "Bestand löschen",
-                "Möchtest du diesen fertigen Tier-Stamm aus dem Bestand löschen?",
-                function(confirmed) {
-                    if (confirmed) {
-                        appState.bestand = appState.bestand.filter(item => item.id !== id);
-                        saveToLocalStorage();
-                        renderBestand();
-                        showToast("Bestandseintrag gelöscht.");
-                    }
-                }
-            );
+            showToast('Erfolgreich geladen!');
         }
 
         function clearBestandPrompt() {
-            customConfirm(
-                "Bestand leeren",
-                "Möchtest du wirklich den gesamten Bestand unwiderruflich leeren?",
-                function(confirmed) {
-                    if (confirmed) {
-                        appState.bestand = [];
-                        saveToLocalStorage();
-                        renderBestand();
-                        showToast("Bestand wurde komplett geleert.");
+            customConfirm('Bestand leeren', 'Alles löschen?', ok => {
+                if(ok) { appState.bestand = []; saveState(); renderBestand(); }
+            });
+        }
+
+        function saveGeminiApiKey(val) {
+            localStorage.setItem('ark_gemini_api_key', val.trim());
+            showToast('API Key lokal gespeichert');
+        }
+
+        function startGeminiScan(e, lineId) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const key = localStorage.getItem('ark_gemini_api_key')?.trim();
+            if (!key) return showToast('Bitte hinterlege zuerst deinen Gemini API-Key in den Einstellungen.', 'error');
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const scale = Math.min(800 / img.width, 800 / img.height, 1);
+                    canvas.width = img.width * scale; canvas.height = img.height * scale;
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    const base64 = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    // Show Loading
+                    document.getElementById('scan-loading-preview-img').src = base64;
+                    const overlay = document.getElementById('scan-loading-overlay');
+                    overlay.classList.remove('hidden');
+                    requestAnimationFrame(() => overlay.classList.remove('opacity-0'));
+
+                    callGeminiAPI(base64.split(',')[1], lineId, key);
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+
+        async function callGeminiAPI(base64Data, lineId, key) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${key}`;
+            const prompt = `Extract ARK dinosaur stats from image. Return ONLY pure JSON. Schema: {"hp": number, "stamina": number, "oxygen": number, "food": number, "weight": number, "melee": number, "gender": "M" or "W"}. Find wild points if visible, else raw values. Map logically.`;
+
+            let delay = 1000;
+            let success = false;
+            let res = null;
+            let lastError = null;
+
+            for (let attempt = 1; attempt <= 5; attempt++) {
+                try {
+                    res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: 'image/jpeg', data: base64Data } }] }],
+                            generationConfig: { responseMimeType: "application/json" }
+                        })
+                    });
+
+                    if (res.ok) {
+                        success = true;
+                        break;
+                    } else if (res.status === 429) {
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2;
+                    } else {
+                        const errData = await res.json().catch(() => ({}));
+                        throw new Error(errData?.error?.message || `HTTP ${res.status}`);
                     }
+                } catch (err) {
+                    lastError = err;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
                 }
-            );
+            }
+
+            const overlay = document.getElementById('scan-loading-overlay');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+
+            if (success && res) {
+                try {
+                    const data = await res.json();
+                    if (data.candidates && data.candidates[0].content.parts[0].text) {
+                        const stats = JSON.parse(data.candidates[0].content.parts[0].text);
+                        applyScannedStats(stats, lineId);
+                    } else {
+                        showToast('Antwort von Gemini enthielt keine analysierbaren Daten.', 'error');
+                    }
+                } catch (parseErr) {
+                    showToast('Fehler beim Parsen der API-Antwort: ' + parseErr.message, 'error');
+                }
+            } else {
+                showToast('Scan fehlgeschlagen: ' + (lastError ? lastError.message : 'Unbekannter API-Fehler'), 'error');
+            }
+        }
+
+        function applyScannedStats(stats, lineId) {
+            const line = appState.lines.find(l => l.id === lineId);
+            line.dinos.push({
+                id: 'dino_' + Date.now(),
+                name: 'Gescannter Dino',
+                gender: stats.gender === 'W' ? 'W' : 'M',
+                hp: stats.hp || 0, stamina: stats.stamina || 0, oxygen: stats.oxygen || 0,
+                food: stats.food || 0, weight: stats.weight || 0, melee: stats.melee || 0,
+                isTrash: false
+            });
+            saveState();
+            renderAllLines();
+            showToast('Daten erfolgreich extrahiert!');
         }
 
         function exportBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `ark_breeding_warm_backup_${new Date().toISOString().split('T')[0]}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showToast("Backup-Download gestartet!");
+            try {
+                const jsonString = JSON.stringify(appState, null, 2);
+                const blob = new Blob([jsonString], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                
+                const dateStr = new Date().toISOString().slice(0, 10);
+                a.href = url; 
+                a.download = `ark_breeder_backup_${dateStr}.json`;
+                
+                document.body.appendChild(a);
+                a.click();
+                
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('Backup erfolgreich heruntergeladen!');
+            } catch(err) {
+                console.error("JSON Export Fehler:", err);
+                showToast('Export fehlgeschlagen!', 'error');
+            }
         }
 
-        function importBackup(event) {
-            const file = event.target.files[0];
+        function importBackup(e) {
+            const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = ev => {
                 try {
-                    const importedState = JSON.parse(e.target.result);
-                    if (importedState.lines && Array.isArray(importedState.lines)) {
-                        appState = importedState;
-                        saveToLocalStorage();
-                        renderAllLines();
+                    const textContent = ev.target.result.replace(/^\uFEFF/, '').trim();
+                    const state = JSON.parse(textContent);
+                    
+                    if (state && (state.lines || state.bestand)) {
+                        appState.lines = Array.isArray(state.lines) ? state.lines : [];
+                        appState.bestand = Array.isArray(state.bestand) ? state.bestand : [];
+                        saveState();
+                        renderAllLines(); 
                         renderBestand();
-                        showToast("Sicherung erfolgreich geladen!");
                         switchTab('tab-breeding');
+                        showToast('Backup erfolgreich geladen!', 'success');
                     } else {
-                        showToast("Ungültiges Backup-Dateiformat.", "error");
+                        showToast('Datei enthält keine kompatiblen Ark-Daten.', 'error');
                     }
-                } catch(err) {
-                    showToast("Fehler beim Einlesen des Backups.", "error");
+                } catch(err) { 
+                    console.error("Import Fehler:", err);
+                    showToast('Fehlerhaftes Dateiformat (JSON ungültig)', 'error'); 
                 }
             };
             reader.readAsText(file);
-            event.target.value = '';
+            e.target.value = '';
         }
 
         function confirmResetAllPrompt() {
-            customConfirm(
-                "Werksreset ausführen",
-                "Möchtest du wirklich ALLE Daten löschen und die App zurücksetzen? Sämtliche Linien gehen verloren!",
-                function(confirmed) {
-                    if (confirmed) {
-                        localStorage.removeItem('ark_breeding_state_warm_v3');
-                        appState = { lines: [], bestand: [] };
-                        initializeDefaultDatabase();
-                        renderAllLines();
-                        renderBestand();
-                        showToast("App wurde zurückgesetzt.", "info");
-                        switchTab('tab-breeding');
-                    }
+            customConfirm('Werksreset', 'Alle Daten löschen?', ok => {
+                if(ok) {
+                    localStorage.removeItem('ark_hub_v4');
+                    appState = { lines: [], bestand: [] };
+                    initDefaultData(); renderAllLines(); renderBestand();
+                    showToast('Reset erfolgreich');
                 }
-            );
+            });
         }
     </script>
 </body>
